@@ -254,9 +254,11 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	tex.type = type;
 	tex.glTexture = 0;
 
-	printf("%d,%d,%d,%u,%u\n", tex.width, tex.height,
-		tex.internalformat, tex.format, tex.type);
-
+	printf("texture width : %d, \n", tex.width);
+	printf("texture height : %d, \n", tex.height);
+	printf("texture internalformat : %d, \n", tex.internalformat);
+	printf("texture format : %u, \n", tex.format);
+	printf("texture type : %u, \n", tex.type);
 
 	glGenTextures(1, &tex.glTexture);
 	gl_err = glGetError();
@@ -267,8 +269,9 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	}
 
 	glBindTexture(GL_TEXTURE_2D, tex.glTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, tex.internalformat, tex.width,
-		tex.height, 0, tex.format, tex.type, data);
+	//glTexImage2D(GL_TEXTURE_2D, 0, tex.internalformat, tex.width,
+		//tex.height, 0, tex.format, tex.type, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	gl_err = glGetError();
 	if (gl_err != GL_NO_ERROR)

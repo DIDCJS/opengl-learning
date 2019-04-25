@@ -103,30 +103,28 @@ void main() {
 //Learn
 
 const static char *pVertexShaderLearn = R"(
- #version 330 core
+#version 330 core
 layout(location = 0) in vec3 aPos;
-//layout(location = 2) in vec2 aTexCoord; 
+layout(location = 1) in vec2 aTexCoord; 
 
-//out vec2 TexCoord;
+out vec2 TexCoord;
 void main(){
 	
 	gl_Position = vec4(aPos, 1.0); 
+	TexCoord = vec2(aTexCoord.x, 1.0f - aTexCoord.y);
 }
 )";
 
 
 static const char* pFragmentShaderLearn = R"(
 #version 330 core  
-//out vec4 FragColor;
-//in vec3 ourColor;
-//in vec2 TexCoord;         
-//uniform sampler2D ourTexture1; 
-//uniform sampler2D ourTexture2; 
+
+in vec2 TexCoord;         
+uniform sampler2D ourTexture0; 
+
 void main(){
-	//vec2 TexCoord1 = vec2(TexCoord.x, 1.0f - TexCoord.y);
-	//gl_FragColor =texture(ourTexture1, TexCoord1); 
-	//gl_FragColor =texture(ourTexture2, TexCoord1).zyxw; 
-	gl_FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	gl_FragColor = texture(ourTexture0, TexCoord); 
+
 }
 )";
 
@@ -143,11 +141,11 @@ const static char* FragmentShaderSource[NUM_SHADERS] = {
 };
 
 const static float vertices_matrix[] = {
-	//     ---- 位置 --     - 纹理坐标 -
-	1.0f, 1.0f, 0.0f,    1.0f, 1.0f,   // 右上
-	1.0f, -1.0f, 0.0f,   1.0f, 0.0f,   // 右下
-	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f,   // 左下
-	-1.0f,  1.0f, 0.0f,   0.0f, 1.0f    // 左上
+	//     ---- 位置 ----      - 纹理坐标 -
+		 0.5f,  0.5f, 0.0f,     1.0f, 1.0f,   // 右上
+		 0.5f, -0.5f, 0.0f,     1.0f, 0.0f,   // 右下
+		-0.5f, -0.5f, 0.0f,    0.0f, 0.0f,   // 左下
+		-0.5f,  0.5f, 0.0f,     0.0f, 1.0f    // 左上
 };
 const static unsigned int indices_matrix[] = { // 注意索引从0开始! 
 	0, 1, 3, // 第一个三角形

@@ -17,6 +17,8 @@ void processInput(GLFWwindow *window) {
 		glfwSetWindowShouldClose(window, true);
 }
 int main() {
+	
+#if 1
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -40,14 +42,23 @@ int main() {
 	
 	glViewport(0, 0, 800, 600);
 
-
 	//¶ÁÈ¡Í¼Æ¬
 	cv::Mat img_1 = cv::imread(IMG_PATH"img1.jpg");
 	cv::Mat img_2 = cv::imread(IMG_PATH"img2.jpg");
+	if (img_1.channels() == 3) {
+		cv::cvtColor(img_1, img_1, cv::COLOR_BGR2RGBA);
+		cv::cvtColor(img_2, img_2, cv::COLOR_BGR2RGBA);
+	}
+	else if (img_1.channels() == 4) {
+		cv::cvtColor(img_1, img_1, cv::COLOR_BGRA2RGBA);
+		cv::cvtColor(img_2, img_2, cv::COLOR_BGRA2RGBA);
+	}
+	//cv::imshow("img_1", img_1);
+	//cv::imshow("img_2", img_2);
+	//cv::waitKey(0);
 	LearnGL* learnGL = new LearnGL();
-	
-	learnGL->Init(img_1.data, img_1.rows, img_1.cols, img_1.channels(), 
-				img_2.data, img_2.rows, img_2.cols, img_2.channels());
+	learnGL->Init(img_1.data, img_1.cols, img_1.rows, img_1.channels(),
+				img_2.data, img_2.cols, img_2.rows, img_2.channels());
 
 
 	while (!glfwWindowShouldClose(window))
@@ -73,5 +84,6 @@ int main() {
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();
+#endif 
 	return 0;
 }

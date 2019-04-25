@@ -4,7 +4,7 @@
 #include "glad/glad.h"
 #include "GLRenders.h"
 
-#define IMG_PATH "img"
+#define IMG_PATH "img//"
 
 enum {
 	TEXTURE0 = 0,
