@@ -53,7 +53,7 @@ static GLint GetUniformID(GLuint programHandle, std::string attribute_name)
 	GLint attri_id = -1;
 	if (programHandle == 0)
 	{
-		printf("program id is NULL");
+		printf("program id is NULL\n");
 	}
 	else
 	{
@@ -62,7 +62,7 @@ static GLint GetUniformID(GLuint programHandle, std::string attribute_name)
 
 	if (attri_id == -1)
 	{
-		printf("there is an error in loading Attribute name:%s ", attribute_name.c_str());
+		printf("there is an error in loading Attribute name:%s \n", attribute_name.c_str());
 	}
 	return attri_id;
 }
@@ -72,7 +72,7 @@ GLint GLRenders::findUniform(std::string attribute_name)
 #if MAP
 	if (m_attributes.find(attribute_name) == m_attributes.end())
 	{
-		printf("the attribute named %s has not been initialized", attribute_name.c_str());
+		printf("the attribute named %s has not been initialized\n", attribute_name.c_str());
 		m_attributes[attribute_name].attribute_id = GetUniformID(m_ProgramHandle, attribute_name);
 	}
 
@@ -94,7 +94,7 @@ bool GLRenders::setTextureID(std::string attribute_name, const GLenum texture_sl
 		return true;
 	}
 	else {
-		printf("texture id is NULL");
+		printf("texture id is NULL\n");
 	}
 	return false;
 }
@@ -164,7 +164,7 @@ GLint GLRenders::findAttribute(std::string attribute_name)
 #if MAP
 	if (m_attributes.find(attribute_name) == m_attributes.end())
 	{
-		printf("the attribute named %s has not been initialized", attribute_name.c_str());
+		printf("the attribute named %s has not been initialized\n", attribute_name.c_str());
 		m_attributes[attribute_name].attribute_id = GetAttributeID(m_ProgramHandle, attribute_name);
 	}
 	return m_attributes[attribute_name].attribute_id;
@@ -206,7 +206,7 @@ bool GLRenders::disableVertexAttribArray(std::string attribute_name)
 #if MAP
 	if (m_attributes.find(attribute_name) == m_attributes.end())
 	{
-		printf("can not find the array attribute which is named with %s", attribute_name.c_str());
+		printf("can not find the array attribute which is named with %s\n", attribute_name.c_str());
 			return false;
 	}
 	glDisableVertexAttribArray(m_attributes[attribute_name].attribute_id);
@@ -239,7 +239,7 @@ void CheckGLError()
 		const GLenum err = glGetError();
 		if (GL_NO_ERROR == err)
 			break;
-		printf("GL Error: %x", err);
+		printf("GL Error: %x\n", err);
 		abort();
 	}
 }
@@ -254,7 +254,7 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	tex.type = type;
 	tex.glTexture = 0;
 
-	printf("%d,%d,%d,%u,%u", tex.width, tex.height,
+	printf("%d,%d,%d,%u,%u\n", tex.width, tex.height,
 		tex.internalformat, tex.format, tex.type);
 
 
@@ -262,7 +262,7 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	gl_err = glGetError();
 	if (gl_err != GL_NO_ERROR)
 	{
-		printf("thE texture glGenTextures failed");
+		printf("thE texture glGenTextures failed\n");
 		return gl_err;
 	}
 
@@ -273,7 +273,7 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	gl_err = glGetError();
 	if (gl_err != GL_NO_ERROR)
 	{
-		printf(" texture glTexImage2D failed");
+		printf(" texture glTexImage2D failed\n");
 		abort();
 		return gl_err;
 	}
@@ -284,7 +284,7 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	gl_err = glGetError();
 	if (gl_err != GL_NO_ERROR)
 	{
-		printf("glTexParameteri failed");
+		printf("glTexParameteri failed\n");
 		return gl_err;
 	}
 

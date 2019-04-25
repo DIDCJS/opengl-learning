@@ -105,18 +105,12 @@ void main() {
 const static char *pVertexShaderLearn = R"(
  #version 330 core
 layout(location = 0) in vec3 aPos;
-//layout(location = 1) in vec3 aColor; 
-layout(location = 2) in vec2 aTexCoord; 
+//layout(location = 2) in vec2 aTexCoord; 
 
-uniform mat4 view;
-
-
-out vec2 TexCoord;
+//out vec2 TexCoord;
 void main(){
 	
-	gl_Position = view * vec4(aPos, 1.0); 
-	//	ourColor = aColor;	
-	TexCoord = aTexCoord;	
+	gl_Position = vec4(aPos, 1.0); 
 }
 )";
 
@@ -125,13 +119,14 @@ static const char* pFragmentShaderLearn = R"(
 #version 330 core  
 //out vec4 FragColor;
 //in vec3 ourColor;
-in vec2 TexCoord;         
-uniform sampler2D ourTexture1; 
-uniform sampler2D ourTexture2; 
+//in vec2 TexCoord;         
+//uniform sampler2D ourTexture1; 
+//uniform sampler2D ourTexture2; 
 void main(){
-	vec2 TexCoord1 = vec2(TexCoord.x, 1.0f - TexCoord.y);
-	gl_FragColor =texture(ourTexture1, TexCoord1); 
-	gl_FragColor =texture(ourTexture2, TexCoord1).zyxw; 
+	//vec2 TexCoord1 = vec2(TexCoord.x, 1.0f - TexCoord.y);
+	//gl_FragColor =texture(ourTexture1, TexCoord1); 
+	//gl_FragColor =texture(ourTexture2, TexCoord1).zyxw; 
+	gl_FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 )";
 
@@ -160,6 +155,7 @@ const static unsigned int indices_matrix[] = { // 注意索引从0开始!
 };
 
 
+
 const static float vertices[] = {
 	//     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
 	1.0f, 1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
@@ -172,6 +168,11 @@ const static unsigned int indices[] = { // 注意索引从0开始!
 	1, 2, 3  // 第二个三角形
 };
 
+const static float vertices_learn[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
+};
 
 class GLShaders {
 public:

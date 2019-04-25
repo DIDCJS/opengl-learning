@@ -75,7 +75,7 @@ GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pF
 	}
 	if (vertexShader)
 	{
-		glDeleteShader(vertexShader);
+		 (vertexShader);
 		vertexShader = 0;
 	}
 	if (pixelShader)
