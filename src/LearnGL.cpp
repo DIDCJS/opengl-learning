@@ -27,7 +27,7 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 
 
-void LearnGL::LearnGL_Main() {
+void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
 	//COMPLIE SHADER
 	{
 		glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(VertexShaderSource[SHADER_LEARN], FragmentShaderSource[SHADER_LEARN]);
@@ -39,7 +39,7 @@ void LearnGL::LearnGL_Main() {
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_matrix), vertices_matrix, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -79,10 +79,46 @@ void LearnGL::LearnGL_Main() {
 	//_render[SHADER_LEARN].setTextureID("ourTexture2", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
 
 
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-	trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-	_render[SHADER_LEARN].setMat4Uniform("transform", trans);
+	//glm::mat4 trans = glm::mat4(1.0f);
+	//trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+	//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+	//_render[SHADER_LEARN].setMat4Uniform("transform", trans);
+
+	glEnable(GL_DEPTH_TEST);
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+	//std::cout << glm::radians(20.0f);
+	//glm::mat4 model = glm::mat4(1.0f);
+	//model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 view = glm::mat4(1.0f);
+	// 注意，我们将矩阵向我们要进行移动场景的反方向移动。
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(75.0f), (float)nWidth / nHeight, 0.1f, 100.0f);
+
+	//_render[SHADER_LEARN].setMat4Uniform("model", model);
+	_render[SHADER_LEARN].setMat4Uniform("view", view);
+	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, cubePositions[i]);
+		float angle = 20.0f * i;
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		_render[SHADER_LEARN].setMat4Uniform("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

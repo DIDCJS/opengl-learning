@@ -56,6 +56,7 @@ int main() {
 	//cv::imshow("img_1", img_1);
 	//cv::imshow("img_2", img_2);
 	//cv::waitKey(0);
+
 	LearnGL* learnGL = new LearnGL();
 	learnGL->Init(img_1.data, img_1.cols, img_1.rows, img_1.channels(),
 				img_2.data, img_2.cols, img_2.rows, img_2.channels());
@@ -70,10 +71,10 @@ int main() {
 		// render
 		// ------
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//main
-		learnGL->LearnGL_Main();
+		learnGL->LearnGL_Main(img_1.cols, img_1.rows);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

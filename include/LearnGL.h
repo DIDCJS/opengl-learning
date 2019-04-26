@@ -24,7 +24,7 @@ public:
 	void Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 		unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
 		/*unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) ;
-	void LearnGL_Main();
+	void LearnGL_Main(int nWidth, int nHeight);
 	void Release();
 
 };
