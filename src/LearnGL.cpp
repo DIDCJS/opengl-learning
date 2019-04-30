@@ -3,6 +3,7 @@
 #include "GLShaders.h"
 #include "GLDefine.h"
 
+
 //glm
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -13,6 +14,8 @@
 void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
 		unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) {
+
+
 	glProgram = new GLuint[NUM_SHADERS];
 	_render = new GLRenders[NUM_SHADERS];
 	glGenVertexArrays(1, &VAO);
@@ -27,7 +30,7 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 
 
-void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
+void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	//COMPLIE SHADER
 	{
 		glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(VertexShaderSource[SHADER_LEARN], FragmentShaderSource[SHADER_LEARN]);
@@ -54,6 +57,13 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
 
 	//uniform,attribute
 
+
+	_render[SHADER_LEARN].setTextureID("ourTexture0", GL_TEXTURE0, 0, m_TexImages[TEXTURE0].glTexture, 0);
+	//_render[SHADER_LEARN].setTextureID("ourTexture2", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
+
+
+	glEnable(GL_DEPTH_TEST);
+
 #if 0 
 	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -75,17 +85,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
 #endif
 
 
-	_render[SHADER_LEARN].setTextureID("ourTexture0", GL_TEXTURE0, 0, m_TexImages[TEXTURE0].glTexture, 0);
-	//_render[SHADER_LEARN].setTextureID("ourTexture2", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
-
-
-	//glm::mat4 trans = glm::mat4(1.0f);
-	//trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-	//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
-	//_render[SHADER_LEARN].setMat4Uniform("transform", trans);
-
-	glEnable(GL_DEPTH_TEST);
-
+	
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
@@ -98,14 +98,16 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
-	//std::cout << glm::radians(20.0f);
-	//glm::mat4 model = glm::mat4(1.0f);
-	//model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	float radius = 10.0f;
+	float camX = sin(glfwGetTime()) * radius;
+	float camZ = cos(glfwGetTime()) * radius;
 	glm::mat4 view = glm::mat4(1.0f);
-	// 注意，我们将矩阵向我们要进行移动场景的反方向移动。
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(75.0f), (float)nWidth / nHeight, 0.1f, 100.0f);
+	//view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	view = camera.GetViewMatrix();
+
+	glm::mat4 projection = glm::mat4(1.0f); 
+	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
 
 	//_render[SHADER_LEARN].setMat4Uniform("model", model);
 	_render[SHADER_LEARN].setMat4Uniform("view", view);
@@ -119,7 +121,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight) {
 		_render[SHADER_LEARN].setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-
+	//std::cout << glfwGetTime() << std::endl;
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 }
