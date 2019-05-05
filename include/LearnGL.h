@@ -16,11 +16,12 @@ enum {
 
 class LearnGL {
 private:
-	GLuint VAO;
+	GLuint VAO, LightVAO;
 	GLuint VBO, EBO, FBO;
 	GLuint* glProgram;
 	GLRenders* _render;
 	TexImage m_TexImages[NUM_TEXTURES];
+	bool firstDraw = true;
 public:
 	void Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 		unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,

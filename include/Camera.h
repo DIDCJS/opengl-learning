@@ -63,12 +63,12 @@ public:
 	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix()
 	{
-		std::cout << "Front.x : " << Front.x << std::endl;
+		/*std::cout << "Front.x : " << Front.x << std::endl;
 		std::cout << "Front.y : " << Front.y << std::endl;
-		std::cout << "Front.z : " << Front.z << std::endl;
-		//return glm::lookAt(Position, Position + Front, Up);
+		std::cout << "Front.z : " << Front.z << std::endl;*/
+	    return glm::lookAt(Position, Position + Front, Up);
 
-		
+		/*
 		glm::mat4 left = glm::mat4(1.0f);
 		left[0][0] = Right.x;
 		left[1][0] = Right.y;
@@ -85,7 +85,7 @@ public:
 		right[3][1] = -Position.y;
 		right[3][2] = -Position.z;
 
-		return left * right;
+		return left * right;*/
 	}
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
