@@ -11,6 +11,8 @@
 
 #include <GLFW/glfw3.h>
 
+const float PI = 3.141592653;
+
 void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
 		unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) {
@@ -32,6 +34,19 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 
 void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
+
+	glm::vec3 lightPos = glm::vec3(2.0f, 1.0f, 2.0f);
+	glm::vec3 newLightPos = glm::vec3(2.0f, 1.0f, 2.0f);
+	float precent = glfwGetTime() / 5.0f;
+	precent -= (int)precent;
+	precent *= 2 * PI;
+	float R = sqrt((lightPos.x * lightPos.x) + ((lightPos.y * lightPos.y)));
+	newLightPos.z = sin(precent) * R;
+	newLightPos.x = cos(precent) * R;
+	lightPos = newLightPos;
+	//lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+	//lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+	//std::cout << precent << std::endl;
 	//COMPLIE SHADER
 
 	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(VertexShaderSource[SHADER_LEARN], FragmentShaderSource[SHADER_LEARN]);
@@ -50,9 +65,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LEARN].setVectexAttribute("aPos", 3, 5 * sizeof(float), (const float*)(0 * sizeof(float)));
-		//纹理坐标
-		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
+		_render[SHADER_LEARN].setVectexAttribute("aPos", 3, 6 * sizeof(float), (const float*)(0 * sizeof(float)));
+		_render[SHADER_LEARN].setVectexAttribute("aNormal", 3, 6 * sizeof(float), (const float*)(3 * sizeof(float)));
 	}
 
 	glUseProgram(glProgram[SHADER_LEARN]);
@@ -74,10 +88,14 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_LEARN].setMat4Uniform("view", view);
 	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
 
-	//lightColor objectColor
-
+	//lightColor objectColor lightPos
+	_render[SHADER_LEARN].setFlt4Uniform("lightPos", lightPos.x, lightPos.y, lightPos.z, 1.0f);
 	_render[SHADER_LEARN].setFlt4Uniform("lightColor", 1.0f, 1.0f, 1.0f, 1.0f);
 	_render[SHADER_LEARN].setFlt4Uniform("objectColor", 1.0f, 0.5f, 0.31f, 1.0f);
+	_render[SHADER_LEARN].setFlt4Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z, 1.0f);
+	std::cout << "x: " << camera.Position.x << std::endl;
+	std::cout << "y: " << camera.Position.y << std::endl;
+	std::cout << "z: " << camera.Position.z << std::endl;
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	//Light
@@ -90,14 +108,14 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LIGHT].setVectexAttribute("aPos", 3, 5 * sizeof(float), (const float*)(0 * sizeof(float)));
+		_render[SHADER_LIGHT].setVectexAttribute("aPos", 3, 6 * sizeof(float), (const float*)(0 * sizeof(float)));
 		//纹理坐标
 		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
 		firstDraw = false;
 	}
 	glUseProgram(glProgram[SHADER_LIGHT]);
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
+	model = glm::translate(model, lightPos);
 	model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
 	_render[SHADER_LIGHT].setMat4Uniform("model", model);
 	_render[SHADER_LIGHT].setMat4Uniform("view", view);
