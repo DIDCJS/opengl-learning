@@ -9,6 +9,8 @@
 #include <map>
 #include <string>
 
+#include "UniformAttribute.h"
+
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -44,7 +46,7 @@ enum {
 
 
 //template<gl_attribute_type attribute_type>
-class glAttribute {
+class glAttribute{
 public:
 	GLint attribute_id;
 	bool bNeedDisable;
@@ -56,7 +58,7 @@ public:
 
 };
 
-class GLRenders
+class GLRenders : public  UniformAttribute
 {
 public:
 	enum {
@@ -69,22 +71,6 @@ public:
 
 public:
 	bool setProgramHandle(const GLuint ProgramHandle);
-
-	GLint findUniform(std::string attribute_name);
-	GLint findAttribute(std::string attribute_name);
-
-	bool setTextureID(std::string attribute_name, const GLenum texture_slot, const int texture_local_id, const GLint textureID, const bool IsExtTexture);
-	bool setIntUniform(std::string attribute_name, const GLint _data);
-	bool setFltUniform(std::string attribute_name, const GLfloat _data);
-	bool setFlt2Uniform(std::string attribute_name, const float data_x, const float data_y);
-	bool setFlt4Uniform(std::string attribute_name, const float data_x, const float data_y, const float data_z, const float data_w);
-	bool setMat4Uniform(std::string attribute_name, const glm::mat4 trans);
-	bool setVectexAttribute(std::string attribute_name, const GLint size, const int vectex_num, const float* _data);
-	bool setTextureCoordsAttribute(std::string attribute_name, const float* _data, const GLint size, const int vectex_num);
-	bool setFltArrayUniform(std::string attribute_name, const float* _data, const int vectex_num);
-
-	bool disableVertexAttribArray(std::string attribute_name);
-
 	bool drawArrays(GLenum mode, GLint first, GLsizei count);
 
 
@@ -95,7 +81,7 @@ protected:
 	std::map<std::string, glAttribute> m_attributes;
 	//bool m_IsExtTexture;//是否为拓展纹理
 	//shader脚本
-	GLuint m_ProgramHandle;
+
 
 };
 

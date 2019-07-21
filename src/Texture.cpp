@@ -1,63 +1,6 @@
+#include "Texture.h"
 
-#include "GLRenders.h"
-
-
-#ifndef GL_TEXTURE_EXTERNAL_OES
-#define GL_TEXTURE_EXTERNAL_OES 0x8D65
-#endif
-
-#define MAP 1
-
-GLRenders::GLRenders()
-{
-	m_ProgramHandle = 0;
-
-}
-
-GLRenders::~GLRenders(void)
-{
-
-}
-
-bool GLRenders::setProgramHandle(const GLuint ProgramHandle)
-{
-	if (ProgramHandle != 0)
-	{
-		m_ProgramHandle = ProgramHandle;
-		return true;
-	}
-	return false;
-}
-
-
-bool GLRenders::drawArrays(GLenum mode, GLint first, GLsizei count)
-{
-	glDrawArrays(mode, first, count);
-#if MAP
-	for (auto iter = m_attributes.begin(); iter != m_attributes.end(); ++iter)
-	{
-		if (iter->second.bNeedDisable)
-		{
-			glDisableVertexAttribArray(iter->second.attribute_id);
-		}
-	}
-#endif
-	return true;
-}
-
-void CheckGLError()
-{
-	while (true)
-	{
-		const GLenum err = glGetError();
-		if (GL_NO_ERROR == err)
-			break;
-		printf("GL Error: %x\n", err);
-		abort();
-	}
-}
-
-GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, GLenum type, GLenum format, GLint minFilter, GLint magFilter, void* data /*= NULL*/)
+GLint Texture::CreateTexture(TexImage& tex, int width, int height, GLint internalformat, GLenum type, GLenum format, GLint minFilter, GLint magFilter, void* data /*= NULL*/)
 {
 	GLint gl_err = GL_NO_ERROR;
 	tex.width = width;
