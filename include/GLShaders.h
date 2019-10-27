@@ -107,8 +107,8 @@ const static char *pVertexShaderLearn = R"(
 #version 330 core
 layout(location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-out vec4 Normal;
-out vec4 FragPos;
+out vec3 Normal;
+out vec3 FragPos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -116,37 +116,43 @@ uniform mat4 projection;
 void main(){
 	
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
-	FragPos =view * model * vec4(aPos, 1.0);
-	Normal = vec4(mat3(transpose(inverse(view*model))) * aNormal, 1.0f);
+	FragPos =(view * model * vec4(aPos, 1.0)).rgb;
+	Normal = mat3(transpose(inverse(view*model))) * aNormal;
 }
 )";
 
 
 static const char* pFragmentShaderLearn = R"(
 #version 330 core  
-in vec4 Normal;
-in vec4 FragPos;
-uniform vec4 lightPos;
-uniform vec4 objectColor;
-uniform vec4 lightColor;
-uniform vec4 viewPos;
+in vec3 Normal;
+in vec3 FragPos;
+uniform vec3 lightPos;
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+uniform vec3 viewPos;
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+}; 
 
+uniform Material u_material;
 void main(){
-	float ambientStrength = 0.1;
-    vec4 ambient = ambientStrength * lightColor;
+    vec3 ambient = lightColor * u_material.ambient;
 
-	vec4 norm = normalize(Normal);
-	vec4 lightDir = normalize(lightPos - FragPos);
-	float diff = max(dot(norm, lightDir), 0.0);
-	vec4 diffuse = diff * lightColor;
+	vec3 norm = normalize(Normal);  //法线归一化
+	vec3 lightDir = normalize(lightPos - FragPos);    //光方向归一化
+	float diff = max(dot(norm, lightDir), 0.0);     //点乘模拟角度值，两向量角度越小，越接近1，范围[0,1]
+	vec3 diffuse = diff * lightColor * u_material.diffuse;  //最后漫反射值
 
-	float specularStrength = 0.5;
-	vec4 viewDir = normalize(viewPos - FragPos);
-	vec4 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-	vec4 specular = spec * lightColor;	
+	vec3 viewDir = normalize(viewPos - FragPos);   //第一视角向量
+	vec3 reflectDir = reflect(-lightDir, norm);     //关于法线对称的光向量
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);   //反光度
+	vec3 specular = spec * lightColor *  u_material.specular;	
 
-	gl_FragColor = (specular+ diffuse + ambient) * objectColor;
+	gl_FragColor = vec4( (specular+ diffuse + ambient) * objectColor, 1.0);
+	//gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 )";
 

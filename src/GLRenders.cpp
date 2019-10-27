@@ -129,6 +129,16 @@ bool GLRenders::setFlt2Uniform(std::string attribute_name, const float data_x, c
 	return true;
 }
 
+bool GLRenders::setFlt3Uniform(std::string attribute_name, const float data_x, const float data_y, const float data_z)
+{
+
+	GLint uniform_id = findUniform(attribute_name);
+
+
+	glUniform3f(uniform_id, data_x, data_y, data_z);
+	return true;
+}
+
 
 bool GLRenders::setFlt4Uniform(std::string attribute_name, const float data_x, const float data_y, const float data_z, const float data_w)
 {

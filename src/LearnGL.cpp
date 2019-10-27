@@ -89,13 +89,21 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
 
 	//lightColor objectColor lightPos
-	_render[SHADER_LEARN].setFlt4Uniform("lightPos", lightPos.x, lightPos.y, lightPos.z, 1.0f);
-	_render[SHADER_LEARN].setFlt4Uniform("lightColor", 1.0f, 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFlt4Uniform("objectColor", 1.0f, 0.5f, 0.31f, 1.0f);
-	_render[SHADER_LEARN].setFlt4Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z, 1.0f);
-	std::cout << "x: " << camera.Position.x << std::endl;
+	_render[SHADER_LEARN].setFlt3Uniform("lightPos", lightPos.x, lightPos.y, lightPos.z);
+	_render[SHADER_LEARN].setFlt3Uniform("lightColor", 1.0f, 1.0f, 1.0f);
+	_render[SHADER_LEARN].setFlt3Uniform("objectColor", 1.0f, 0.5f, 0.31f);
+	_render[SHADER_LEARN].setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+
+	_render[SHADER_LEARN].setFlt3Uniform("u_material.ambient", 0.329412	, 0.223529, 0.027451);
+	_render[SHADER_LEARN].setFlt3Uniform("u_material.diffuse", 0.780392, 0.568627, 0.113725);
+	_render[SHADER_LEARN].setFlt3Uniform("u_material.specular", 0.992157,0.941176, 0.807843);
+	_render[SHADER_LEARN].setFltUniform("u_material.shininess", 32.0f);
+
+
+			
+	/*std::cout << "x: " << camera.Position.x << std::endl;
 	std::cout << "y: " << camera.Position.y << std::endl;
-	std::cout << "z: " << camera.Position.z << std::endl;
+	std::cout << "z: " << camera.Position.z << std::endl;*/
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	//Light

@@ -77,6 +77,7 @@ public:
 	bool setIntUniform(std::string attribute_name, const GLint _data);
 	bool setFltUniform(std::string attribute_name, const GLfloat _data);
 	bool setFlt2Uniform(std::string attribute_name, const float data_x, const float data_y);
+	bool setFlt3Uniform(std::string attribute_name, const float data_x, const float data_y, const float data_z);
 	bool setFlt4Uniform(std::string attribute_name, const float data_x, const float data_y, const float data_z, const float data_w);
 	bool setMat4Uniform(std::string attribute_name, const glm::mat4 trans);
 	bool setVectexAttribute(std::string attribute_name, const GLint size, const int vectex_num, const float* _data);
