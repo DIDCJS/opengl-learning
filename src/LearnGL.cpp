@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <GLFW/glfw3.h>
+#include <opencv2/opencv.hpp>
 
 const float PI = 3.141592653;
 
@@ -29,6 +30,21 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	//CreateTexture(m_TexImages[TEXTURE0], nT0W, nT0H, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT0);
 	//CreateTexture(m_TexImages[TEXTURE1], nT1W, nT1W, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT1);
 	//CreateTexture(m_TexImages[TEXTURE2], nT2W, nT2W, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT2);
+
+
+	//diffuses map , spercular map
+	cv::Mat diffuseImg = cv::imread(IMG_PATH"diffuse.png");
+	cv::Mat spercularImg = cv::imread(IMG_PATH"specular.png");
+	if (diffuseImg.channels() == 3) {
+		cv::cvtColor(diffuseImg, diffuseImg, cv::COLOR_BGR2RGBA);
+		cv::cvtColor(spercularImg, spercularImg, cv::COLOR_BGR2RGBA);
+	}
+	else if (diffuseImg.channels() == 4) {
+		cv::cvtColor(diffuseImg, diffuseImg, cv::COLOR_BGRA2RGBA);
+		cv::cvtColor(spercularImg, spercularImg, cv::COLOR_BGRA2RGBA);
+	}
+	CreateTexture(m_TexImages[TEXTURE1], diffuseImg.cols, diffuseImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, diffuseImg.data);
+	CreateTexture(m_TexImages[TEXTURE2], spercularImg.cols, spercularImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, spercularImg.data);
 }
 
 
@@ -65,15 +81,16 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LEARN].setVectexAttribute("aPos", 3, 6 * sizeof(float), (const float*)(0 * sizeof(float)));
-		_render[SHADER_LEARN].setVectexAttribute("aNormal", 3, 6 * sizeof(float), (const float*)(3 * sizeof(float)));
+		_render[SHADER_LEARN].setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
+		_render[SHADER_LEARN].setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
+		_render[SHADER_LEARN].setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
 	}
 
 	glUseProgram(glProgram[SHADER_LEARN]);
 
 	//uniform,attribute
-	//_render[SHADER_LEARN].setTextureID("ourTexture0", GL_TEXTURE0, 0, m_TexImages[TEXTURE0].glTexture, 0);
-	//_render[SHADER_LEARN].setTextureID("ourTexture2", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
+	_render[SHADER_LEARN].setTextureID("u_diffuseMap", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
+	_render[SHADER_LEARN].setTextureID("u_specularMap", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
 
 
 	glEnable(GL_DEPTH_TEST);
@@ -116,7 +133,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LIGHT].setVectexAttribute("aPos", 3, 6 * sizeof(float), (const float*)(0 * sizeof(float)));
+		_render[SHADER_LIGHT].setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
 		//纹理坐标
 		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
 		firstDraw = false;
