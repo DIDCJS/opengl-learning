@@ -132,8 +132,23 @@ in vec3 FragPos;
 in vec2 TexCoords;
 uniform vec3 lightPos;
 uniform vec3 objectColor;
-uniform vec3 lightColor;
 uniform vec3 viewPos;
+
+struct Light {
+    vec3 position; // 使用定向光就不再需要了
+    vec3 direction;
+	float cutOff;
+	float outerCutOff;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 struct Material {
     vec3 ambient;
     vec3 diffuse;
@@ -141,6 +156,7 @@ struct Material {
     float shininess;
 }; 
 
+uniform Light u_light;
 uniform Material u_material;
 
 uniform sampler2D u_diffuseMap;
@@ -150,17 +166,37 @@ void main(){
 	vec3 diffuseMap = texture2D(u_diffuseMap, TexCoords).rgb;
 	vec3 specularMap = texture2D(u_specularMap, TexCoords).rgb;
 
-    vec3 ambient = lightColor * diffuseMap;
+	float distance    = length(u_light.position - FragPos);
+	float attenuation = 1.0 / (u_light.constant + u_light.linear * distance + 
+                u_light.quadratic * (distance * distance));
 
+	vec3 lightDir = normalize(u_light.position - FragPos);    //光方向归一化
+
+	//环境光	
+    vec3 ambient = u_light.ambient * diffuseMap;
+
+	//漫反射
 	vec3 norm = normalize(Normal);  //法线归一化
-	vec3 lightDir = normalize(lightPos - FragPos);    //光方向归一化
 	float diff = max(dot(norm, lightDir), 0.0);     //点乘模拟角度值，两向量角度越小，越接近1，范围[0,1]
-	vec3 diffuse = diff * lightColor * diffuseMap;  //最后漫反射值
+	vec3 diffuse = diff * u_light.diffuse * diffuseMap;  //最后漫反射值
 
+	//镜面反射
 	vec3 viewDir = normalize(viewPos - FragPos);   //第一视角向量
 	vec3 reflectDir = reflect(-lightDir, norm);     //关于法线对称的光向量
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);   //反光度
-	vec3 specular = spec * lightColor *  specularMap;	
+	vec3 specular = spec * u_light.specular *  specularMap;	
+
+	//模拟灯源衰弱
+	ambient  *= attenuation; 
+	diffuse  *= attenuation;
+	specular *= attenuation;
+
+	//聚光灯强度
+	float theta     = dot(lightDir, normalize(-u_light.direction));
+	float epsilon   = u_light.cutOff - u_light.outerCutOff;	
+	float intensity = clamp((theta - u_light.outerCutOff) / epsilon, 0.0, 1.0);    
+	diffuse  *= intensity;
+	specular *= intensity;
 
 	gl_FragColor = vec4( (specular+ diffuse + ambient) , 1.0);
 	//gl_FragColor = vec4(diffuseMap, 1.0);

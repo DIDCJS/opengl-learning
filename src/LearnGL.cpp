@@ -34,7 +34,7 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 	//diffuses map , spercular map
 	cv::Mat diffuseImg = cv::imread(IMG_PATH"diffuse.png");
-	cv::Mat spercularImg = cv::imread(IMG_PATH"specular.png");
+	cv::Mat spercularImg = cv::imread(IMG_PATH"color-specular.png");
 	if (diffuseImg.channels() == 3) {
 		cv::cvtColor(diffuseImg, diffuseImg, cv::COLOR_BGR2RGBA);
 		cv::cvtColor(spercularImg, spercularImg, cv::COLOR_BGR2RGBA);
@@ -95,33 +95,60 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	glEnable(GL_DEPTH_TEST);
 
-	//model view projection
-	glm::mat4 model = glm::mat4(1.0f);
-	glm::mat4 view = glm::mat4(1.0f);
-	view = camera.GetViewMatrix();
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
-	_render[SHADER_LEARN].setMat4Uniform("model", model);
-	_render[SHADER_LEARN].setMat4Uniform("view", view);
-	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
-
-	//lightColor objectColor lightPos
-	_render[SHADER_LEARN].setFlt3Uniform("lightPos", lightPos.x, lightPos.y, lightPos.z);
-	_render[SHADER_LEARN].setFlt3Uniform("lightColor", 1.0f, 1.0f, 1.0f);
+	//objectColor viewPos
 	_render[SHADER_LEARN].setFlt3Uniform("objectColor", 1.0f, 0.5f, 0.31f);
 	_render[SHADER_LEARN].setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
 
+	//light struct
+	_render[SHADER_LEARN].setFlt3Uniform("u_light.direction", camera.Front.r, camera.Front.g, camera.Front.b);
+	_render[SHADER_LEARN].setFlt3Uniform("u_light.position", camera.Position.x, camera.Position.y, camera.Position.z);
+	_render[SHADER_LEARN].setFltUniform("u_light.cutOff", glm::cos(glm::radians(12.5f)));
+	_render[SHADER_LEARN].setFltUniform("u_light.outerCutOff", glm::cos(glm::radians(17.5f)));
+	_render[SHADER_LEARN].setFlt3Uniform("u_light.ambient", 1.0f, 1.0f, 1.0f);
+	_render[SHADER_LEARN].setFlt3Uniform("u_light.diffuse", 1.0f, 1.0f, 1.0f);
+	_render[SHADER_LEARN].setFlt3Uniform("u_light.specular", 1.0f, 1.0f, 1.0f);
+	//模拟光源衰变
+	_render[SHADER_LEARN].setFltUniform("u_light.constant", 1.0f);
+	_render[SHADER_LEARN].setFltUniform("u_light.linear", 0.09f);
+	_render[SHADER_LEARN].setFltUniform("u_light.quadratic", 0.032f);
+
+	//material struct
 	_render[SHADER_LEARN].setFlt3Uniform("u_material.ambient", 0.329412	, 0.223529, 0.027451);
 	_render[SHADER_LEARN].setFlt3Uniform("u_material.diffuse", 0.780392, 0.568627, 0.113725);
 	_render[SHADER_LEARN].setFlt3Uniform("u_material.specular", 0.992157,0.941176, 0.807843);
 	_render[SHADER_LEARN].setFltUniform("u_material.shininess", 32.0f);
 
+	//model view projection
+	glm::mat4 view = glm::mat4(1.0f);
+	view = camera.GetViewMatrix();
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
+	_render[SHADER_LEARN].setMat4Uniform("view", view);
+	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
 
-			
-	/*std::cout << "x: " << camera.Position.x << std::endl;
-	std::cout << "y: " << camera.Position.y << std::endl;
-	std::cout << "z: " << camera.Position.z << std::endl;*/
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//define 10 box medels
+	glm::mat4 model;
+	glm::vec3 cubePositions[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+	for (int i = 0; i < 10; i++) {
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, cubePositions[i]);
+		float angle = 20.0f * i;
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		_render[SHADER_LEARN].setMat4Uniform("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
 
 	//Light
 	//COMPLIE SHADER
@@ -146,7 +173,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_LIGHT].setMat4Uniform("view", view);
 	_render[SHADER_LIGHT].setMat4Uniform("projection", projection);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void LearnGL::Release() {
