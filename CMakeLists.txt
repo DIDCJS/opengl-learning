@@ -8,19 +8,9 @@ SET(SRC_PATH ${PROJECT_SOURCE_DIR}/src)
 SET(INC_PATH ${PROJECT_SOURCE_DIR}/include)
 SET(3RD_PATH ${PROJECT_SOURCE_DIR}/3rdParty/3rd)
 
-message("###project_source_dir: " ${PROJECT_SOURCE_DIR})
-message("###src_path: " ${SRC_PATH})
-message("###3rd_path: " ${3RD_PATH})
-
-
-SET(INC_FILES ${INC_PATH})
-#source_group(include FILES ${INC_FILES})
-#source_group(include REGULAR_EXPRESSION "${INC_FILES}/*.h")
-file(GLOB_RECURSE Header_Files ${INC_FILES}/*.h)
-source_group(includes FILES ${Header_Files})
-
-
-link_directories(${3RD_PATH}/opengl-glfw-3.2.1/win32/libs)
+MESSAGE("###project_source_dir: " ${PROJECT_SOURCE_DIR})
+MESSAGE("###src_path: " ${SRC_PATH})
+MESSAGE("###3rd_path: " ${3RD_PATH})
 
 include_directories(
     ${INC_PATH}
@@ -39,13 +29,15 @@ file(GLOB_RECURSE FILE_CPP
     ${3RD_PATH}/glad/src/glad.c
 )
 
-add_executable(${PROJ_NAME}
-    ${INC_FILES}
-    ${Header_Files}
+#引入外部库
+LINK_DIRECTORIES(${3RD_PATH}/opengl-glfw-3.2.1/win32/libs)
+
+
+ADD_EXECUTABLE(${PROJ_NAME}
 	${FILE_CPP}
 )
 
-target_link_libraries(${PROJ_NAME} 
+TARGET_LINK_LIBRARIES(${PROJ_NAME} 
         glfw3
         opengl32
 )
@@ -61,5 +53,6 @@ IF(OpenCV_FOUND)
 
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(${PROJ_NAME} ${OpenCV_LIBS})
-
+ELSE()
+MESSAGE("### CANT FIND OPENCV")
 ENDIF()
