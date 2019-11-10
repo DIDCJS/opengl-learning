@@ -18,6 +18,7 @@ include_directories(
     ${3RD_PATH}/glad/include
     ${3RD_PATH}/KHR
     ${3RD_PATH}/glm-master
+	${3RD_PATH}/assimp/include
 
 )
 
@@ -31,6 +32,7 @@ file(GLOB_RECURSE FILE_CPP
 
 #引入外部库
 LINK_DIRECTORIES(${3RD_PATH}/opengl-glfw-3.2.1/win32/libs)
+LINK_DIRECTORIES(${3RD_PATH}/assimp/libs)
 
 
 ADD_EXECUTABLE(${PROJ_NAME}
