@@ -1,8 +1,9 @@
 #include <iostream>
+#include <direct.h>
+
 #include "LearnGL.h"
 #include "GLShaders.h"
 #include "GLDefine.h"
-
 
 //glm
 #include <glm/glm.hpp>
@@ -11,6 +12,9 @@
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
+
+#include <Mesh.h>
+
 
 const float PI = 3.141592653;
 #define NR_POINT_LIGHTS 4
@@ -46,9 +50,9 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	}
 	CreateTexture(m_TexImages[TEXTURE1], diffuseImg.cols, diffuseImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, diffuseImg.data);
 	CreateTexture(m_TexImages[TEXTURE2], spercularImg.cols, spercularImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, spercularImg.data);
+
+	LoadModel(R"(model/nanosuit/nanosuit.obj)");
 }
-
-
 
 void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
@@ -118,7 +122,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
 		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
 		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "constant", 1.0f);
-		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "linear", 0.09f);
+		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "linear", 0.09f); 
 		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "quadratic", 0.032f);
 	}
 
@@ -222,4 +226,91 @@ void LearnGL::Release() {
 			m_TexImages[i].glTexture = 0;
 		}
 	}
+
+	delete m_pScene;
+}
+
+void LearnGL::Draw() {
+
+}
+
+void LearnGL::LoadModel(std::string path) {
+	Assimp::Importer import;
+	m_pScene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!m_pScene || m_pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_pScene->mRootNode)
+	{
+		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
+		return;
+	}
+	m_sDirectory = path.substr(0, path.find_last_of('/'));
+
+	ProcessNode(m_pScene->mRootNode, m_pScene);
+}
+void LearnGL::ProcessNode(aiNode *node, const aiScene *scene) {
+	// 处理节点所有的网格（如果有的话）
+	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	{
+		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+		m_vMesh.push_back(ProcessMesh(mesh, scene));
+	}
+	// 接下来对它的子节点重复这一过程
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
+		ProcessNode(node->mChildren[i], scene);
+	}
+}
+
+
+std::vector<TexImage> LearnGL::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
+{
+	std::vector<TexImage> textures;
+	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+	{
+		aiString str;
+		mat->GetTexture(type, i, &str);
+		TexImage TexImage;
+		std::string path = m_sDirectory + str.C_Str();
+		TextureFromFile(path, TexImage);
+		textures.push_back(TexImage);
+	}
+	return textures;
+}
+
+Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<TexImage> textures;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		//
+		Vertex vertex;
+		// 处理顶点位置、法线和纹理坐标
+		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+
+	}
+	// 处理索引
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	{
+		aiFace face = mesh->mFaces[i];
+		for (unsigned int j = 0; j < face.mNumIndices; j++)
+			indices.push_back(face.mIndices[j]);
+	}
+		// 处理材质
+	if (mesh->mMaterialIndex >= 0)
+	{
+		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+		std::vector<TexImage> diffuseMaps = loadMaterialTextures(material,
+			aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		std::vector<TexImage> specularMaps = loadMaterialTextures(material,
+			aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+	}
+
+	return Mesh(vertices, indices, textures);
+
 }

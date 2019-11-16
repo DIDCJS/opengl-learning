@@ -1,5 +1,6 @@
 
 #include "GLRenders.h"
+#include <opencv2/opencv.hpp>
 
 
 #ifndef GL_TEXTURE_EXTERNAL_OES
@@ -302,4 +303,16 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 	}
 
 	return gl_err;
+}
+
+void TextureFromFile(std::string path, TexImage& tex) {
+	std::string prefix = R"(model/)";
+	cv::Mat img = cv::imread(prefix + path);
+	if (img.channels() == 3) {
+		cv::cvtColor(img, img, cv::COLOR_BGR2RGBA);
+	}
+	else if (img.channels() == 4) {
+		cv::cvtColor(img, img, cv::COLOR_BGRA2RGBA);
+	}
+	CreateTexture(tex, img.cols, img.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, img.data);
 }

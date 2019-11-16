@@ -22,26 +22,33 @@ include_directories(
 
 )
 
-file(GLOB_RECURSE FILE_CPP 
-    ${SRC_PATH}/main.cpp
-    ${SRC_PATH}/LearnGL.cpp
-    ${SRC_PATH}/GLShaders.cpp
-    ${SRC_PATH}/GLRenders.cpp
+
+
+FILE(GLOB_RECURSE Header_Files 
+	${INC_PATH}/*.h
+)
+
+File(GLOB_RECURSE FILE_CPP 
+    ${SRC_PATH}/*.cpp
     ${3RD_PATH}/glad/src/glad.c
 )
+#分文件夹
+SOURCE_GROUP(includes FILES ${Header_Files})
+SOURCE_GROUP(src FILES ${FILE_CPP})
 
 #引入外部库
 LINK_DIRECTORIES(${3RD_PATH}/opengl-glfw-3.2.1/win32/libs)
 LINK_DIRECTORIES(${3RD_PATH}/assimp/libs)
 
-
 ADD_EXECUTABLE(${PROJ_NAME}
 	${FILE_CPP}
+	 ${Header_Files}
 )
 
 TARGET_LINK_LIBRARIES(${PROJ_NAME} 
         glfw3
         opengl32
+		assimp-vc140-mt
 )
 
 

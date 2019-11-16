@@ -26,6 +26,7 @@ struct TexImage
 
 GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, GLenum type, GLenum  format, GLint minFilter, GLint magFilter, void* data = NULL);
 
+void TextureFromFile(std::string path, TexImage& tex);
 
 #define MAX_VERTEX_LENGTH 1024
 
