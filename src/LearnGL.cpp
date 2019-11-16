@@ -70,7 +70,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	//std::cout << precent << std::endl;
 	//COMPLIE SHADER
 
-	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(VertexShaderSource[SHADER_LEARN], FragmentShaderSource[SHADER_LEARN]);
+	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(
+		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]) );
 	_render[SHADER_LEARN].setProgramHandle(glProgram[SHADER_LEARN]);
 
 
@@ -179,8 +180,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	//Light
 	//COMPLIE SHADER
-
-	glProgram[SHADER_LIGHT] = GLShaders::CreateProgram_Source(VertexShaderSource[SHADER_LIGHT], FragmentShaderSource[SHADER_LIGHT]);
+	glProgram[SHADER_LIGHT] = GLShaders::CreateProgram_Source(
+		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LIGHT]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LIGHT]));
 	_render[SHADER_LIGHT].setProgramHandle(glProgram[SHADER_LIGHT]);
 
 	glBindVertexArray(LightVAO);

@@ -86,3 +86,26 @@ GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pF
 
 	return program;
 }
+
+const char* GLShaders::LoadShaderPath(const char* path) {
+	FILE* pFile;
+	pFile = fopen(path, "rb");
+
+	if (pFile == NULL)
+	{
+		printf("###%s was not found");
+		return NULL;
+	}
+	fseek(pFile, 0, SEEK_END);
+	int len = ftell(pFile);
+	char* str = new char[len + 1];
+	if (str == NULL)
+	{
+		return NULL;
+	}
+	fseek(pFile, 0, SEEK_SET);
+	fread(str, len, 1, pFile);
+	str[len] = '\0';
+	fclose(pFile);
+	return str;
+}
