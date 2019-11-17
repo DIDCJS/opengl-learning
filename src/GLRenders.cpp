@@ -73,7 +73,7 @@ GLint GLRenders::findUniform(std::string attribute_name)
 #if MAP
 	if (m_attributes.find(attribute_name) == m_attributes.end())
 	{
-		printf("the attribute named %s has not been initialized\n", attribute_name.c_str());
+		//printf("the attribute named %s has not been initialized\n", attribute_name.c_str());
 		m_attributes[attribute_name].attribute_id = GetUniformID(m_ProgramHandle, attribute_name);
 	}
 
@@ -175,7 +175,7 @@ GLint GLRenders::findAttribute(std::string attribute_name)
 #if MAP
 	if (m_attributes.find(attribute_name) == m_attributes.end())
 	{
-		printf("the attribute named %s has not been initialized\n", attribute_name.c_str());
+		/*printf("the attribute named %s has not been initialized\n", attribute_name.c_str());*/
 		m_attributes[attribute_name].attribute_id = GetAttributeID(m_ProgramHandle, attribute_name);
 	}
 	return m_attributes[attribute_name].attribute_id;
@@ -306,8 +306,11 @@ GLint CreateTexture(TexImage& tex, int width, int height, GLint internalformat, 
 }
 
 void TextureFromFile(std::string path, TexImage& tex) {
-	std::string prefix = R"(model/)";
+	std::string prefix = R"(model/nanosuit/)";
 	cv::Mat img = cv::imread(prefix + path);
+	if (img.data == nullptr) {
+		printf("### error : can not load texture");
+	}
 	if (img.channels() == 3) {
 		cv::cvtColor(img, img, cv::COLOR_BGR2RGBA);
 	}

@@ -18,6 +18,7 @@
 
 const float PI = 3.141592653;
 #define NR_POINT_LIGHTS 4
+#define RENDER_FROM_MODEL 1
 
 void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
@@ -29,7 +30,7 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	glGenVertexArrays(1, &VAO);
 	glGenVertexArrays(1, &LightVAO);
 	glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
+	glGenBuffers(1, &EBO);
 
 
 	//CreateTexture(m_TexImages[TEXTURE0], nT0W, nT0H, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT0);
@@ -55,6 +56,10 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 }
 
 void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
+#if RENDER_FROM_MODEL == 1
+	Draw(nWidth, nHeight, camera, fov);
+#else
+
 
 	glm::vec3 lightPos = glm::vec3(2.0f, 1.0f, 2.0f);
 	glm::vec3 newLightPos = glm::vec3(2.0f, 1.0f, 2.0f);
@@ -75,6 +80,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_LEARN].setProgramHandle(glProgram[SHADER_LEARN]);
 
 
+	glUseProgram(glProgram[SHADER_LEARN]);
+
 	//BUFFER
 
 	glBindVertexArray(VAO);
@@ -91,10 +98,6 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		_render[SHADER_LEARN].setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
 		_render[SHADER_LEARN].setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
 	}
-
-	glUseProgram(glProgram[SHADER_LEARN]);
-
-
 	glEnable(GL_DEPTH_TEST);
 
 	//objectColor viewPos
@@ -203,7 +206,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		_render[SHADER_LIGHT].setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-
+#endif
 }
 
 void LearnGL::Release() {
@@ -231,8 +234,70 @@ void LearnGL::Release() {
 	delete m_pScene;
 }
 
-void LearnGL::Draw() {
 
+
+void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
+
+	
+
+
+	glProgram[SHADER_MESH] = GLShaders::CreateProgram_Source(
+		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_MESH]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_MESH]));
+	_render[SHADER_MESH].setProgramHandle(glProgram[SHADER_MESH]);
+
+	glUseProgram(glProgram[SHADER_MESH]);
+
+	for (int i = 0; i < m_vMesh.size(); i++) {
+		Mesh mesh = m_vMesh[i];
+
+		glBindVertexArray(VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.vertices.size(), &(mesh.vertices[0]), GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.indices.size(), &(mesh.indices[0]), GL_STATIC_DRAW);
+
+
+		_render[SHADER_MESH].setVectexAttribute("aPos", 3, sizeof(Vertex), (const float*)(0 * sizeof(float)));
+		_render[SHADER_MESH].setVectexAttribute("aNormal", 3, sizeof(Vertex), (const float*)(3 * sizeof(float)));
+		_render[SHADER_MESH].setVectexAttribute("aTexCoords", 2, sizeof(Vertex), (const float*)(6 * sizeof(float)));
+
+
+
+		unsigned int diffuseNr = 1;
+		unsigned int specularNr = 1;
+		for (unsigned int i = 0; i < mesh.textures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i); // 在绑定之前激活相应的纹理单元
+			// 获取纹理序号（diffuse_textureN 中的 N）
+			std::string number;
+			std::string name = mesh.textures[i].textureType;
+			if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++);
+			_render[SHADER_MESH].setTextureID(name + number, GL_TEXTURE0 +i, i, mesh.textures[i].glTexture, false);
+		}
+
+
+		//model view projection
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		glm::mat4 view = glm::mat4(1.0f);
+		view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::mat4(1.0f);
+		projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
+		_render[SHADER_MESH].setMat4Uniform("view", view);
+		_render[SHADER_MESH].setMat4Uniform("projection", projection);
+		_render[SHADER_MESH].setMat4Uniform("model", model);
+
+
+		glDrawElements(GL_TRIANGLES, sizeof(unsigned int) * mesh.indices.size(), GL_UNSIGNED_INT, 0);
+
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
 }
 
 void LearnGL::LoadModel(std::string path) {
@@ -244,7 +309,6 @@ void LearnGL::LoadModel(std::string path) {
 		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
 		return;
 	}
-	m_sDirectory = path.substr(0, path.find_last_of('/'));
 
 	ProcessNode(m_pScene->mRootNode, m_pScene);
 }
@@ -271,8 +335,9 @@ std::vector<TexImage> LearnGL::loadMaterialTextures(aiMaterial *mat, aiTextureTy
 		aiString str;
 		mat->GetTexture(type, i, &str);
 		TexImage TexImage;
-		std::string path = m_sDirectory + str.C_Str();
+		std::string path = str.C_Str();
 		TextureFromFile(path, TexImage);
+		TexImage.textureType = typeName;
 		textures.push_back(TexImage);
 	}
 	return textures;
@@ -291,6 +356,11 @@ Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 		vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		vertices.push_back(vertex);
+
+		//printf("Position[%d].x : %.3f\n", i, vertex.Position.x);
+		//printf("Position[%d].y : %.3f\n", i, vertex.Position.y);
+		//printf("Position[%d].z : %.3f\n", i, vertex.Position.z);
 
 	}
 	// 处理索引

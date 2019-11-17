@@ -1,5 +1,4 @@
-#ifndef __GLSHADER_H__
-#define __GLSHADER_H__
+#pragma once
 
 #include "glad/glad.h"
 
@@ -7,6 +6,7 @@ enum {
 	SHADER_CRAYON,
 	SHADER_LEARN,
 	SHADER_LIGHT,
+	SHADER_MESH,
 	NUM_SHADERS,
 };
 
@@ -14,12 +14,14 @@ enum {
 const static char* VertexShaderPath[NUM_SHADERS] = {
 	R"(shaders//crayon.vs)",
 	R"(shaders//learn.vs)",
-	R"(shaders//light.vs)"
+	R"(shaders//light.vs)",
+	R"(shaders//mesh.vs)"
 };
 const static char* FragmentShaderPath[NUM_SHADERS] = {
 	R"(shaders//crayon.fs)",
 	R"(shaders//learn.fs)",
-	R"(shaders//light.fs)"
+	R"(shaders//light.fs)",
+	R"(shaders//mesh.fs)"
 };
 
 const static float vertices_matrix[] = {
@@ -99,5 +101,3 @@ public:
 
 	static const char* LoadShaderPath(const char* path);
 };
-
-#endif

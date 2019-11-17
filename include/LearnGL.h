@@ -31,7 +31,6 @@ private:
 	const aiScene *m_pScene = nullptr;
 	//存储每个节点的Mesh(包括Pos,Index,texUV)数据
 	std::vector<Mesh> m_vMesh;
-	std::string m_sDirectory;
 public:
 	void Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 		unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
@@ -39,7 +38,7 @@ public:
 	void LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov);
 	void Release();
 private:
-	void Draw();
+	void Draw(int nWidth, int nHeight, Camera& camera, float fov);
 	void LoadModel(std::string path);
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
