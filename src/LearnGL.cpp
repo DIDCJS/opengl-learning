@@ -247,13 +247,31 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	glUseProgram(glProgram[SHADER_MESH]);
 
-	for (int i = 0; i < m_vMesh.size(); i++) {
+	//model view projection
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+	glm::mat4 view = glm::mat4(1.0f);
+	view = camera.GetViewMatrix();
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
+	_render[SHADER_MESH].setMat4Uniform("view", view);
+	_render[SHADER_MESH].setMat4Uniform("projection", projection);
+	_render[SHADER_MESH].setMat4Uniform("model", model);
+
+	//printf("### m_vMesh.size() : %d\n", m_vMesh.size());
+	for (int i = 1; i < 2; i++) {
 		Mesh mesh = m_vMesh[i];
 
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.vertices.size(), &(mesh.vertices[0]), GL_STATIC_DRAW);
+
+		//for (int i = 0; i < 1800; i++) {
+		//	printf("### [%d]x : %.3f\n",i , mesh.vertices[i].TexCoords.x);
+		//	printf("### [%d]y : %.3f\n",i , mesh.vertices[i].TexCoords.y);
+		//}
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.indices.size(), &(mesh.indices[0]), GL_STATIC_DRAW);
@@ -267,34 +285,25 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 
 		unsigned int diffuseNr = 1;
 		unsigned int specularNr = 1;
+		//printf("### mesh.textures.size() : %d\n", mesh.textures.size());
 		for (unsigned int i = 0; i < mesh.textures.size(); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i); // 在绑定之前激活相应的纹理单元
 			// 获取纹理序号（diffuse_textureN 中的 N）
 			std::string number;
 			std::string name = mesh.textures[i].textureType;
-			if (name == "texture_diffuse")
+			if (name == "texture_diffuse") {
 				number = std::to_string(diffuseNr++);
-			else if (name == "texture_specular")
+				_render[SHADER_MESH].setTextureID(name + number, GL_TEXTURE0 + i, i, mesh.textures[i].glTexture, false);
+			}
+			else if (name == "texture_specular") {
+				//printf("### now the texture name is texture_specular\n");
 				number = std::to_string(specularNr++);
-			_render[SHADER_MESH].setTextureID(name + number, GL_TEXTURE0 +i, i, mesh.textures[i].glTexture, false);
+			}
+			
 		}
 
-
-		//model view projection
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-		glm::mat4 view = glm::mat4(1.0f);
-		view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::mat4(1.0f);
-		projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
-		_render[SHADER_MESH].setMat4Uniform("view", view);
-		_render[SHADER_MESH].setMat4Uniform("projection", projection);
-		_render[SHADER_MESH].setMat4Uniform("model", model);
-
-
-		glDrawElements(GL_TRIANGLES, sizeof(unsigned int) * mesh.indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 1800 , GL_UNSIGNED_INT, 0);
 
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 	}

@@ -1,7 +1,7 @@
 
 #include "GLRenders.h"
 #include <opencv2/opencv.hpp>
-
+#include "GLDefine.h"
 
 #ifndef GL_TEXTURE_EXTERNAL_OES
 #define GL_TEXTURE_EXTERNAL_OES 0x8D65
@@ -87,6 +87,13 @@ bool GLRenders::setTextureID(std::string attribute_name, const GLenum texture_sl
 {
 
 	GLint uniform_id = findUniform(attribute_name);
+	if (uniform_id == GL_INVALID_VALUE || uniform_id == GL_INVALID_OPERATION || uniform_id == GL_INVALID_OPERATION) {
+		printf("### error : can not find attribute_name in shaders");
+	}
+	else {
+		//printf("### uniform_id : %d\n", uniform_id);
+	}
+	//CHECK_GL
 	if (textureID != 0)
 	{
 		glActiveTexture(texture_slot);
