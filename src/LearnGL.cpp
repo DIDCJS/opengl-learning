@@ -260,7 +260,7 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_MESH].setMat4Uniform("model", model);
 
 	//printf("### m_vMesh.size() : %d\n", m_vMesh.size());
-	for (int i = 1; i < 2; i++) {
+	for (int i = 0; i < m_vMesh.size(); i++) {
 		Mesh mesh = m_vMesh[i];
 
 		glBindVertexArray(VAO);
@@ -268,20 +268,12 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.vertices.size(), &(mesh.vertices[0]), GL_STATIC_DRAW);
 
-		//for (int i = 0; i < 1800; i++) {
-		//	printf("### [%d]x : %.3f\n",i , mesh.vertices[i].TexCoords.x);
-		//	printf("### [%d]y : %.3f\n",i , mesh.vertices[i].TexCoords.y);
-		//}
-
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.indices.size(), &(mesh.indices[0]), GL_STATIC_DRAW);
-
 
 		_render[SHADER_MESH].setVectexAttribute("aPos", 3, sizeof(Vertex), (const float*)(0 * sizeof(float)));
 		_render[SHADER_MESH].setVectexAttribute("aNormal", 3, sizeof(Vertex), (const float*)(3 * sizeof(float)));
 		_render[SHADER_MESH].setVectexAttribute("aTexCoords", 2, sizeof(Vertex), (const float*)(6 * sizeof(float)));
-
-
 
 		unsigned int diffuseNr = 1;
 		unsigned int specularNr = 1;
