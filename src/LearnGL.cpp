@@ -295,7 +295,7 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 			
 		}
 
-		glDrawElements(GL_TRIANGLES, 1800 , GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, mesh.indices.size() , GL_UNSIGNED_INT, 0);
 
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
