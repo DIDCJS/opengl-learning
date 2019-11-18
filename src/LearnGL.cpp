@@ -259,11 +259,35 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_MESH].setMat4Uniform("projection", projection);
 	_render[SHADER_MESH].setMat4Uniform("model", model);
 
+	glBindVertexArray(VAO);
+
+	//定灯源
+	glm::vec3 pointLightPositions[] = {
+	glm::vec3(0.7f,  0.2f,  2.0f),
+	glm::vec3(2.3f, -3.3f, -4.0f),
+	glm::vec3(-4.0f,  2.0f, -12.0f),
+	glm::vec3(0.0f,  0.0f, -3.0f)
+	};
+
+	for (int i = 0; i < 1; i++) {
+		std::string IndexPointLight = "pointLights[";
+		IndexPointLight += std::to_string(i);
+		IndexPointLight += "].";
+		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
+		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
+		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
+		_render[SHADER_MESH].setFltUniform(IndexPointLight + "constant", 1.0f);
+		_render[SHADER_MESH].setFltUniform(IndexPointLight + "linear", 0.14f);
+		_render[SHADER_MESH].setFltUniform(IndexPointLight + "quadratic", 0.07f);
+	}
+
+	//viewPos 用于与光源点算向量
+	_render[SHADER_MESH].setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+
 	//printf("### m_vMesh.size() : %d\n", m_vMesh.size());
 	for (int i = 0; i < m_vMesh.size(); i++) {
 		Mesh mesh = m_vMesh[i];
-
-		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * mesh.vertices.size(), &(mesh.vertices[0]), GL_STATIC_DRAW);
