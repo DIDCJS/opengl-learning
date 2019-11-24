@@ -77,11 +77,9 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]) );
-	_render[SHADER_LEARN].setProgramHandle(glProgram[SHADER_LEARN]);
-
-
-	glUseProgram(glProgram[SHADER_LEARN]);
-
+	auto &nowRender = _render[SHADER_MESH];
+	nowRender.setProgramHandle(glProgram[SHADER_LEARN]);
+	nowRender.Use();
 	//BUFFER
 
 	glBindVertexArray(VAO);
@@ -94,15 +92,14 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LEARN].setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
-		_render[SHADER_LEARN].setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
-		_render[SHADER_LEARN].setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
+		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
+		nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
+		nowRender.setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
 	}
 	glEnable(GL_DEPTH_TEST);
 
 	//objectColor viewPos
-	_render[SHADER_LEARN].setFlt3Uniform("objectColor", 1.0f, 0.5f, 0.31f);
-	_render[SHADER_LEARN].setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+	nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
 
 	//DirLight
 	/*_render[SHADER_LEARN].setFlt3Uniform("dirLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
@@ -121,32 +118,32 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		std::string IndexPointLight = "pointLights[";
 		IndexPointLight += std::to_string(i);
 		IndexPointLight += "].";
-		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
-		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_LEARN].setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "constant", 1.0f);
-		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "linear", 0.09f); 
-		_render[SHADER_LEARN].setFltUniform(IndexPointLight + "quadratic", 0.032f);
+		nowRender.setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+		nowRender.setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
+		nowRender.setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
+		nowRender.setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
+		nowRender.setFltUniform(IndexPointLight + "constant", 1.0f);
+		nowRender.setFltUniform(IndexPointLight + "linear", 0.09f); 
+		nowRender.setFltUniform(IndexPointLight + "quadratic", 0.032f);
 	}
 
 	//spotLight
-	_render[SHADER_LEARN].setFlt3Uniform("spotLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
-	_render[SHADER_LEARN].setFlt3Uniform("spotLight.position", camera.Position.x, camera.Position.y, camera.Position.z);
-	_render[SHADER_LEARN].setFltUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-	_render[SHADER_LEARN].setFltUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-	_render[SHADER_LEARN].setFlt3Uniform("spotLight.ambient", 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFlt3Uniform("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFlt3Uniform("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFltUniform("spotLight.constant", 1.0f);
-	_render[SHADER_LEARN].setFltUniform("spotLight.linear", 0.09f);
-	_render[SHADER_LEARN].setFltUniform("spotLight.quadratic", 0.032f);
+	nowRender.setFlt3Uniform("spotLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
+	nowRender.setFlt3Uniform("spotLight.position", camera.Position.x, camera.Position.y, camera.Position.z);
+	nowRender.setFltUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+	nowRender.setFltUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+	nowRender.setFlt3Uniform("spotLight.ambient", 1.0f, 1.0f, 1.0f);
+	nowRender.setFlt3Uniform("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	nowRender.setFlt3Uniform("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	nowRender.setFltUniform("spotLight.constant", 1.0f);
+	nowRender.setFltUniform("spotLight.linear", 0.09f);
+	nowRender.setFltUniform("spotLight.quadratic", 0.032f);
 
 	//material struct
-	_render[SHADER_LEARN].setFlt3Uniform("material.ambient", 0.329412	, 0.223529, 0.027451);
-	_render[SHADER_LEARN].setFltUniform("material.shininess", 32.0f);
-	_render[SHADER_LEARN].setTextureID("material.diffuse", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
-	_render[SHADER_LEARN].setTextureID("material.specular", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
+	nowRender.setFlt3Uniform("material.ambient", 0.329412	, 0.223529, 0.027451);
+	nowRender.setFltUniform("material.shininess", 32.0f);
+	nowRender.setTextureID("material.diffuse", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
+	nowRender.setTextureID("material.specular", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
 
 
 	//model view projection
@@ -154,8 +151,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
-	_render[SHADER_LEARN].setMat4Uniform("view", view);
-	_render[SHADER_LEARN].setMat4Uniform("projection", projection);
+	nowRender.setMat4Uniform("view", view);
+	nowRender.setMat4Uniform("projection", projection);
 
 	//define 10 box medels
 	glm::mat4 model;
@@ -176,7 +173,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		model = glm::translate(model, cubePositions[i]);
 		float angle = 20.0f * i;
 		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		_render[SHADER_LEARN].setMat4Uniform("model", model);
+		nowRender.setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
@@ -185,25 +182,27 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	//COMPLIE SHADER
 	glProgram[SHADER_LIGHT] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LIGHT]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LIGHT]));
-	_render[SHADER_LIGHT].setProgramHandle(glProgram[SHADER_LIGHT]);
+	nowRender = _render[SHADER_LIGHT];
+	nowRender.setProgramHandle(glProgram[SHADER_LIGHT]);
+	nowRender.Use();
 
 	glBindVertexArray(LightVAO);
 
 	if (firstDraw == true) {
 		// 位置属性
-		_render[SHADER_LIGHT].setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
+		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
 		//纹理坐标
 		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
 		firstDraw = false;
 	}
-	glUseProgram(glProgram[SHADER_LIGHT]);
-	_render[SHADER_LIGHT].setMat4Uniform("view", view);
-	_render[SHADER_LIGHT].setMat4Uniform("projection", projection);
+
+	nowRender.setMat4Uniform("view", view);
+	nowRender.setMat4Uniform("projection", projection);
 	for (int i = 0; i < NR_POINT_LIGHTS; i++) {
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, pointLightPositions[i]);
 		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-		_render[SHADER_LIGHT].setMat4Uniform("model", model);
+		nowRender.setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 #endif
@@ -237,15 +236,12 @@ void LearnGL::Release() {
 
 
 void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
-
-	
-
-
 	glProgram[SHADER_MESH] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_MESH]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_MESH]));
-	_render[SHADER_MESH].setProgramHandle(glProgram[SHADER_MESH]);
+	auto &nowRender = _render[SHADER_MESH];
+	nowRender.setProgramHandle(glProgram[SHADER_MESH]);
+	nowRender.Use();
 
-	glUseProgram(glProgram[SHADER_MESH]);
 
 	//model view projection
 	glm::mat4 model = glm::mat4(1.0f);
@@ -255,9 +251,9 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 	view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
-	_render[SHADER_MESH].setMat4Uniform("view", view);
-	_render[SHADER_MESH].setMat4Uniform("projection", projection);
-	_render[SHADER_MESH].setMat4Uniform("model", model);
+	nowRender.setMat4Uniform("view", view);
+	nowRender.setMat4Uniform("projection", projection);
+	nowRender.setMat4Uniform("model", model);
 
 	glBindVertexArray(VAO);
 
@@ -273,17 +269,17 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 		std::string IndexPointLight = "pointLights[";
 		IndexPointLight += std::to_string(i);
 		IndexPointLight += "].";
-		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
-		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_MESH].setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
-		_render[SHADER_MESH].setFltUniform(IndexPointLight + "constant", 1.0f);
-		_render[SHADER_MESH].setFltUniform(IndexPointLight + "linear", 0.14f);
-		_render[SHADER_MESH].setFltUniform(IndexPointLight + "quadratic", 0.07f);
+		nowRender.setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+		nowRender.setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
+		nowRender.setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
+		nowRender.setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
+		nowRender.setFltUniform(IndexPointLight + "constant", 1.0f);
+		nowRender.setFltUniform(IndexPointLight + "linear", 0.14f);
+		nowRender.setFltUniform(IndexPointLight + "quadratic", 0.07f);
 	}
 
 	//viewPos 用于与光源点算向量
-	_render[SHADER_MESH].setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+	nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
 
 	//printf("### m_vMesh.size() : %d\n", m_vMesh.size());
 	for (int i = 0; i < m_vMesh.size(); i++) {
@@ -295,9 +291,9 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh.indices.size(), &(mesh.indices[0]), GL_STATIC_DRAW);
 
-		_render[SHADER_MESH].setVectexAttribute("aPos", 3, sizeof(Vertex), (const float*)(0 * sizeof(float)));
-		_render[SHADER_MESH].setVectexAttribute("aNormal", 3, sizeof(Vertex), (const float*)(3 * sizeof(float)));
-		_render[SHADER_MESH].setVectexAttribute("aTexCoords", 2, sizeof(Vertex), (const float*)(6 * sizeof(float)));
+		nowRender.setVectexAttribute("aPos", 3, sizeof(Vertex), (const float*)(0 * sizeof(float)));
+		nowRender.setVectexAttribute("aNormal", 3, sizeof(Vertex), (const float*)(3 * sizeof(float)));
+		nowRender.setVectexAttribute("aTexCoords", 2, sizeof(Vertex), (const float*)(6 * sizeof(float)));
 
 		unsigned int diffuseNr = 1;
 		unsigned int specularNr = 1;
@@ -310,7 +306,7 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 			std::string name = mesh.textures[i].textureType;
 			if (name == "texture_diffuse") {
 				number = std::to_string(diffuseNr++);
-				_render[SHADER_MESH].setTextureID(name + number, GL_TEXTURE0 + i, i, mesh.textures[i].glTexture, false);
+				nowRender.setTextureID(name + number, GL_TEXTURE0 + i, i, mesh.textures[i].glTexture, false);
 			}
 			else if (name == "texture_specular") {
 				//printf("### now the texture name is texture_specular\n");
