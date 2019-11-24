@@ -17,7 +17,6 @@
 
 
 const float PI = 3.141592653;
-#define NR_POINT_LIGHTS 4
 #define RENDER_FROM_MODEL 1
 
 void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
@@ -55,11 +54,35 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	LoadModel(R"(model/nanosuit/nanosuit.obj)");
 }
 
+void LearnGL::Release() {
+	delete glProgram;
+	if (VAO != 0) glDeleteVertexArrays(1, &VAO);
+	if (LightVAO != 0) glDeleteVertexArrays(1, &LightVAO);
+	if (VBO != 0) glDeleteBuffers(1, &VBO);
+	if (EBO != 0) glDeleteBuffers(1, &EBO);
+
+	delete[] _render;
+	for (int i = 0; i < NUM_SHADERS; i++) {
+		glDeleteProgram(glProgram[i]);
+	}
+	delete glProgram;
+
+	for (int i = 0; i < NUM_TEXTURES; ++i)
+	{
+		if (m_TexImages[i].glTexture != 0)
+		{
+			glDeleteTextures(1, &m_TexImages[i].glTexture);
+			m_TexImages[i].glTexture = 0;
+		}
+	}
+
+	delete m_pScene;
+}
+
 void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 #if RENDER_FROM_MODEL == 1
-	Draw(nWidth, nHeight, camera, fov);
+	Draw3D(nWidth, nHeight, camera, fov);
 #else
-
 
 	glm::vec3 lightPos = glm::vec3(2.0f, 1.0f, 2.0f);
 	glm::vec3 newLightPos = glm::vec3(2.0f, 1.0f, 2.0f);
@@ -76,7 +99,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	//COMPLIE SHADER
 
 	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(
-		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]) );
+		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]));
 	auto &nowRender = _render[SHADER_MESH];
 	nowRender.setProgramHandle(glProgram[SHADER_LEARN]);
 	nowRender.Use();
@@ -113,8 +136,8 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	glm::vec3(-4.0f,  2.0f, -12.0f),
 	glm::vec3(0.0f,  0.0f, -3.0f)
 	};
-	
-	for (int i = 0; i < NR_POINT_LIGHTS; i++) {
+	int nPointSize = sizeof(pointLightPositions) / sizeof(glm::vec3);
+	for (int i = 0; i < nPointSize; i++) {
 		std::string IndexPointLight = "pointLights[";
 		IndexPointLight += std::to_string(i);
 		IndexPointLight += "].";
@@ -123,7 +146,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		nowRender.setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
 		nowRender.setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
 		nowRender.setFltUniform(IndexPointLight + "constant", 1.0f);
-		nowRender.setFltUniform(IndexPointLight + "linear", 0.09f); 
+		nowRender.setFltUniform(IndexPointLight + "linear", 0.09f);
 		nowRender.setFltUniform(IndexPointLight + "quadratic", 0.032f);
 	}
 
@@ -140,7 +163,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	nowRender.setFltUniform("spotLight.quadratic", 0.032f);
 
 	//material struct
-	nowRender.setFlt3Uniform("material.ambient", 0.329412	, 0.223529, 0.027451);
+	nowRender.setFlt3Uniform("material.ambient", 0.329412, 0.223529, 0.027451);
 	nowRender.setFltUniform("material.shininess", 32.0f);
 	nowRender.setTextureID("material.diffuse", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
 	nowRender.setTextureID("material.specular", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
@@ -176,17 +199,24 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		nowRender.setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
+	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions);
+#endif
+}
 
-
+void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
+											glm::mat4 view, glm::mat4 projection, glm::vec3* pointLightPositions, int nPointSize) {
 	//Light
-	//COMPLIE SHADER
+//COMPLIE SHADER
 	glProgram[SHADER_LIGHT] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LIGHT]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LIGHT]));
-	nowRender = _render[SHADER_LIGHT];
+	auto& nowRender = _render[SHADER_LIGHT];
 	nowRender.setProgramHandle(glProgram[SHADER_LIGHT]);
 	nowRender.Use();
 
 	glBindVertexArray(LightVAO);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	if (firstDraw == true) {
 		// 位置属性
@@ -196,46 +226,20 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 		firstDraw = false;
 	}
 
+	//model view projection
 	nowRender.setMat4Uniform("view", view);
 	nowRender.setMat4Uniform("projection", projection);
-	for (int i = 0; i < NR_POINT_LIGHTS; i++) {
+	glm::mat4 model;
+	for (int i = 0; i < nPointSize; i++) {
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, pointLightPositions[i]);
 		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
 		nowRender.setMat4Uniform("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-#endif
 }
 
-void LearnGL::Release() {
-	delete glProgram;
-	if (VAO != 0) glDeleteVertexArrays(1, &VAO);
-	if (LightVAO != 0) glDeleteVertexArrays(1, &LightVAO);
-	if (VBO != 0) glDeleteBuffers(1, &VBO);
-	if (EBO != 0) glDeleteBuffers(1, &EBO);
-
-	delete[] _render;
-	for (int i = 0; i < NUM_SHADERS; i++) {
-		glDeleteProgram(glProgram[i]);
-	}
-	delete glProgram;
-
-	for (int i = 0; i < NUM_TEXTURES; ++i)
-	{
-		if (m_TexImages[i].glTexture != 0)
-		{
-			glDeleteTextures(1, &m_TexImages[i].glTexture);
-			m_TexImages[i].glTexture = 0;
-		}
-	}
-
-	delete m_pScene;
-}
-
-
-
-void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
+void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 	glProgram[SHADER_MESH] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_MESH]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_MESH]));
 	auto &nowRender = _render[SHADER_MESH];
@@ -260,12 +264,14 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 	//定灯源
 	glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.7f,  0.2f,  2.0f),
-	glm::vec3(2.3f, -3.3f, -4.0f),
-	glm::vec3(-4.0f,  2.0f, -12.0f),
-	glm::vec3(0.0f,  0.0f, -3.0f)
+	//glm::vec3(2.3f, -3.3f, -4.0f),
+	//glm::vec3(-4.0f,  2.0f, -12.0f),
+	//glm::vec3(0.0f,  0.0f, -3.0f)
 	};
+	int nPointSize = sizeof(pointLightPositions) / sizeof(glm::vec3);
+	std::cout << nPointSize << std::endl;
 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < nPointSize; i++) {
 		std::string IndexPointLight = "pointLights[";
 		IndexPointLight += std::to_string(i);
 		IndexPointLight += "].";
@@ -319,7 +325,10 @@ void LearnGL::Draw(int nWidth, int nHeight, Camera& camera, float fov) {
 
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
+
+	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions, nPointSize);
 }
+
 
 void LearnGL::LoadModel(std::string path) {
 	Assimp::Importer import;

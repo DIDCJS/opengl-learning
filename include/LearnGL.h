@@ -36,9 +36,12 @@ public:
 		unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
 		/*unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) ;
 	void LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov);
+	void Draw3D(int nWidth, int nHeight, Camera& camera, float fov);
 	void Release();
-private:
-	void Draw(int nWidth, int nHeight, Camera& camera, float fov);
+
+protected:
+	void DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
+		glm::mat4 view, glm::mat4 projection, glm::vec3* pointLightPositions, int nPointSize);
 	void LoadModel(std::string path);
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
