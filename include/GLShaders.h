@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glad/glad.h"
-
+#define SHADERS_PATH R"(../opengl-packaging/shaders/)" 
 enum {
 	SHADER_CRAYON,
 	SHADER_LEARN,
@@ -12,16 +12,16 @@ enum {
 
 
 const static char* VertexShaderPath[NUM_SHADERS] = {
-	R"(shaders//crayon.vs)",
-	R"(shaders//learn.vs)",
-	R"(shaders//light.vs)",
-	R"(shaders//mesh.vs)"
+	SHADERS_PATH R"(crayon.vs)",
+	SHADERS_PATH R"(learn.vs)",
+	SHADERS_PATH R"(light.vs)",
+	SHADERS_PATH R"(mesh.vs)"
 };
 const static char* FragmentShaderPath[NUM_SHADERS] = {
-	R"(shaders//crayon.fs)",
-	R"(shaders//learn.fs)",
-	R"(shaders//light.fs)",
-	R"(shaders//mesh.fs)"
+	SHADERS_PATH R"(crayon.fs)",
+	SHADERS_PATH R"(learn.fs)",
+	SHADERS_PATH R"(light.fs)",
+	SHADERS_PATH R"(mesh.fs)"
 };
 
 const static float vertices_matrix[] = {
