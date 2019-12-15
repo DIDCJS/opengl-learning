@@ -7,12 +7,13 @@ PROJECT(${PROJ_NAME})
 SET(SRC_PATH ${PROJECT_SOURCE_DIR}/src)
 SET(INC_PATH ${PROJECT_SOURCE_DIR}/include)
 SET(3RD_PATH ${PROJECT_SOURCE_DIR}/3rdParty/3rd)
+SET(SHADER_PATH ${PROJECT_SOURCE_DIR}/shaders)
 
 MESSAGE("###project_source_dir: " ${PROJECT_SOURCE_DIR})
 MESSAGE("###src_path: " ${SRC_PATH})
 MESSAGE("###3rd_path: " ${3RD_PATH})
 
-include_directories(
+INCLUDE_DIRECTORIES(
     ${INC_PATH}
     ${3RD_PATH}/opengl-glfw-3.2.1/win32/include
     ${3RD_PATH}/glad/include
@@ -32,9 +33,14 @@ File(GLOB_RECURSE FILE_CPP
     ${SRC_PATH}/*.cpp
     ${3RD_PATH}/glad/src/glad.c
 )
+
+File(GLOB_RECURSE FILE_SHADERS 
+     ${SHADER_PATH}/*
+)
 #分文件夹
 SOURCE_GROUP(includes FILES ${Header_Files})
 SOURCE_GROUP(src FILES ${FILE_CPP})
+SOURCE_GROUP(shaders FILES ${FILE_SHADERS})
 
 #引入外部库
 LINK_DIRECTORIES(${3RD_PATH}/opengl-glfw-3.2.1/win32/libs)
@@ -43,6 +49,7 @@ LINK_DIRECTORIES(${3RD_PATH}/assimp/libs)
 ADD_EXECUTABLE(${PROJ_NAME}
 	${FILE_CPP}
 	 ${Header_Files}
+	 ${FILE_SHADERS}
 )
 
 TARGET_LINK_LIBRARIES(${PROJ_NAME} 
