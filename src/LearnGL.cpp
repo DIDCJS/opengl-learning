@@ -38,18 +38,11 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 
 	//diffuses map , spercular map
-	cv::Mat diffuseImg = cv::imread(IMG_PATH"diffuse.png");
-	cv::Mat spercularImg = cv::imread(IMG_PATH"specular.png");
-	if (diffuseImg.channels() == 3) {
-		cv::cvtColor(diffuseImg, diffuseImg, cv::COLOR_BGR2RGBA);
-		cv::cvtColor(spercularImg, spercularImg, cv::COLOR_BGR2RGBA);
-	}
-	else if (diffuseImg.channels() == 4) {
-		cv::cvtColor(diffuseImg, diffuseImg, cv::COLOR_BGRA2RGBA);
-		cv::cvtColor(spercularImg, spercularImg, cv::COLOR_BGRA2RGBA);
-	}
+	cv::Mat diffuseImg = cv::imread(IMG_PATH"diffuse.png", cv::IMREAD_UNCHANGED);
+	cv::Mat spercularImg = cv::imread(IMG_PATH"specular.png", cv::IMREAD_UNCHANGED);
 	CreateTexture(m_TexImages[TEXTURE1], diffuseImg.cols, diffuseImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, diffuseImg.data);
 	CreateTexture(m_TexImages[TEXTURE2], spercularImg.cols, spercularImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, spercularImg.data);
+	CreateCuteTexture(m_TexImages[TEXTURE3], GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, IMG_PATH  R"(skybox/skybox_0/)");
 
 	LoadModel(R"(model/nanosuit/nanosuit.obj)");
 }
@@ -201,6 +194,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	}
 	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions);
 #endif
+	DrawCute(nWidth, nHeight, camera, fov);
 }
 
 void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
@@ -221,20 +215,23 @@ void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
 	if (firstDraw == true) {
 		// 位置属性
 		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
+		nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
 		//纹理坐标
 		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
 		firstDraw = false;
 	}
-
+	nowRender.setTextureID("skybox", GL_TEXTURE0, 0, m_TexImages[TEXTURE3].glTexture, false);
 	//model view projection
 	nowRender.setMat4Uniform("view", view);
 	nowRender.setMat4Uniform("projection", projection);
+	nowRender.setFlt3Uniform("cameraPos", camera.Position.x, camera.Position.y, camera.Position.z);
 	glm::mat4 model;
 	for (int i = 0; i < nPointSize; i++) {
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, pointLightPositions[i]);
 		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
 		nowRender.setMat4Uniform("model", model);
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 }
@@ -287,7 +284,7 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 	//viewPos 用于与光源点算向量
 	nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
 
-	//printf("### m_vMesh.size() : %d\n", m_vMesh.size());
+	//LOG("### m_vMesh.size() : %d", m_vMesh.size());
 	for (int i = 0; i < m_vMesh.size(); i++) {
 		Mesh mesh = m_vMesh[i];
 
@@ -303,7 +300,7 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 
 		unsigned int diffuseNr = 1;
 		unsigned int specularNr = 1;
-		//printf("### mesh.textures.size() : %d\n", mesh.textures.size());
+		//LOG("### mesh.textures.size() : %d", mesh.textures.size());
 		for (unsigned int i = 0; i < mesh.textures.size(); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i); // 在绑定之前激活相应的纹理单元
@@ -315,7 +312,7 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 				nowRender.setTextureID(name + number, GL_TEXTURE0 + i, i, mesh.textures[i].glTexture, false);
 			}
 			else if (name == "texture_specular") {
-				//printf("### now the texture name is texture_specular\n");
+				//LOG("### now the texture name is texture_specular");
 				number = std::to_string(specularNr++);
 			}
 			
@@ -329,6 +326,50 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions, nPointSize);
 }
 
+void LearnGL::DrawCute(int nWidth, int nHeight, Camera& camera, float fov) {
+	glProgram[SHADER_CUTE] = GLShaders::CreateProgram_Source(
+		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_CUTE]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_CUTE]));
+	auto &nowRender = _render[SHADER_CUTE];
+	nowRender.setProgramHandle(glProgram[SHADER_CUTE]);
+	nowRender.Use();
+
+	//model view projection
+	glm::mat4 model = glm::mat4(1.0f);
+	//model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+	//model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+	//view = (camera.GetViewMatrix());
+
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
+	nowRender.setMat4Uniform("view", view);
+	nowRender.setMat4Uniform("projection", projection);
+	nowRender.setMat4Uniform("model", model);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	//if (firstDraw == true) {
+		// 位置属性
+		nowRender.setVectexAttribute("aPos", 3, 3 * sizeof(float), (const float*)(0 * sizeof(float)));
+		/*nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
+		nowRender.setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));*/
+	//	firstDraw = false;
+	//}
+
+	nowRender.setTextureID("u_skybox", GL_TEXTURE0, 0, m_TexImages[TEXTURE3].glTexture, false);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+}
 
 void LearnGL::LoadModel(std::string path) {
 	Assimp::Importer import;
@@ -388,9 +429,9 @@ Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 		vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 		vertices.push_back(vertex);
 
-		//printf("Position[%d].x : %.3f\n", i, vertex.Position.x);
-		//printf("Position[%d].y : %.3f\n", i, vertex.Position.y);
-		//printf("Position[%d].z : %.3f\n", i, vertex.Position.z);
+		//LOG("Position[%d].x : %.3f", i, vertex.Position.x);
+		//LOG("Position[%d].y : %.3f", i, vertex.Position.y);
+		//LOG("Position[%d].z : %.3f", i, vertex.Position.z);
 
 	}
 	// 处理索引

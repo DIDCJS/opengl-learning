@@ -17,6 +17,7 @@ enum {
 	TEXTURE0 = 0,
 	TEXTURE1,
 	TEXTURE2,
+	TEXTURE3, 
 	NUM_TEXTURES
 };
 class LearnGL {
@@ -37,6 +38,8 @@ public:
 		/*unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) ;
 	void LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov);
 	void Draw3D(int nWidth, int nHeight, Camera& camera, float fov);
+	void DrawCute(int nWidth, int nHeight, Camera& camera, float fov);
+
 	void Release();
 
 protected:

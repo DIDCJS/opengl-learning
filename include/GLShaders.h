@@ -7,6 +7,7 @@ enum {
 	SHADER_LEARN,
 	SHADER_LIGHT,
 	SHADER_MESH,
+	SHADER_CUTE,
 	NUM_SHADERS,
 };
 
@@ -15,13 +16,15 @@ const static char* VertexShaderPath[NUM_SHADERS] = {
 	SHADERS_PATH R"(crayon.vs)",
 	SHADERS_PATH R"(learn.vs)",
 	SHADERS_PATH R"(light.vs)",
-	SHADERS_PATH R"(mesh.vs)"
+	SHADERS_PATH R"(mesh.vs)",
+	SHADERS_PATH R"(cute.vs)",
 };
 const static char* FragmentShaderPath[NUM_SHADERS] = {
 	SHADERS_PATH R"(crayon.fs)",
 	SHADERS_PATH R"(learn.fs)",
 	SHADERS_PATH R"(light.fs)",
-	SHADERS_PATH R"(mesh.fs)"
+	SHADERS_PATH R"(mesh.fs)",
+	SHADERS_PATH R"(cute.fs)",
 };
 
 const static float vertices_matrix[] = {
@@ -31,12 +34,56 @@ const static float vertices_matrix[] = {
 		-0.5f, -0.5f, 0.0f,    0.0f, 0.0f,   // 左下
 		-0.5f,  0.5f, 0.0f,     0.0f, 1.0f    // 左上
 };
+
 const static unsigned int indices_matrix[] = { // 注意索引从0开始! 
 	0, 1, 3, // 第一个三角形
 	1, 2, 3  // 第二个三角形
 };
 
+const static float skyboxVertices[] = {
+	// positions          
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
 
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
 
 const static float vertices[] = {
 	// positions          // normals           // texture coords

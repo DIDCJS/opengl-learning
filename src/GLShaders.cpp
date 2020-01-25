@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include "GLShaders.h"
+#include "GLDefine.h"
 #include "glad/glad.h"
 #include <cstdio>
 
@@ -18,7 +19,7 @@ GLuint GLShaders::LoadShader_Source(GLenum shaderType, const char* pSource)
 				char* buf = (char*)malloc(infoLen);
 				if (buf) {
 					glGetShaderInfoLog(shader, infoLen, NULL, buf);
-					printf("Could not compile shader %d:\n%s",
+					LOGE("Could not compile shader %d:%s",
 						shaderType, buf);
 					free(buf);
 				}
@@ -35,13 +36,13 @@ GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pF
 	GLuint vertexShader = LoadShader_Source(GL_VERTEX_SHADER, pVertexSource);
 	if (!vertexShader)
 	{
-		printf("ERROR in load vertex shader!");
+		LOGE("ERROR in load vertex shader!");
 		return 0;
 	}
 	GLuint pixelShader = LoadShader_Source(GL_FRAGMENT_SHADER, pFragmentSource);
 	if (!pixelShader)
 	{
-		printf("ERROR in load pixel shader!");
+		LOGE("ERROR in load pixel shader!");
 		return 0;
 	}
 
@@ -65,7 +66,7 @@ GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pF
 				if (buf)
 				{
 					glGetProgramInfoLog(program, bufLength, NULL, buf);
-					printf("Could not link program:\n%s", buf);
+					LOGE("Could not link program:\n%s", buf);
 					free(buf);
 				}
 			}
@@ -93,7 +94,7 @@ const char* GLShaders::LoadShaderPath(const char* path) {
 
 	if (pFile == NULL)
 	{
-		printf("###%s was not found");
+		LOGE("###%s was not found");
 		return NULL;
 	}
 	fseek(pFile, 0, SEEK_END);
