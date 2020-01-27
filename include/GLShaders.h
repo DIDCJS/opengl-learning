@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "glad/glad.h"
 #define SHADERS_PATH R"(../opengl-packaging/shaders/)" 
@@ -28,16 +28,16 @@ const static char* FragmentShaderPath[NUM_SHADERS] = {
 };
 
 const static float vertices_matrix[] = {
-	//     ---- Î»ÖÃ ----      - ÎÆÀí×ø±ê -
-		 0.5f,  0.5f, 0.0f,     1.0f, 1.0f,   // ÓÒÉÏ
-		 0.5f, -0.5f, 0.0f,     1.0f, 0.0f,   // ÓÒÏÂ
-		-0.5f, -0.5f, 0.0f,    0.0f, 0.0f,   // ×óÏÂ
-		-0.5f,  0.5f, 0.0f,     0.0f, 1.0f    // ×óÉÏ
+	//     ---- ä½ç½® ----      - çº¹ç†åæ ‡ -
+		 0.5f,  0.5f, 0.0f,     1.0f, 1.0f,   // å³ä¸Š
+		 0.5f, -0.5f, 0.0f,     1.0f, 0.0f,   // å³ä¸‹
+		-0.5f, -0.5f, 0.0f,    0.0f, 0.0f,   // å·¦ä¸‹
+		-0.5f,  0.5f, 0.0f,     0.0f, 1.0f    // å·¦ä¸Š
 };
 
-const static unsigned int indices_matrix[] = { // ×¢ÒâË÷Òı´Ó0¿ªÊ¼! 
-	0, 1, 3, // µÚÒ»¸öÈı½ÇĞÎ
-	1, 2, 3  // µÚ¶ş¸öÈı½ÇĞÎ
+const static unsigned int indices_matrix[] = { // æ³¨æ„ç´¢å¼•ä»0å¼€å§‹! 
+	0, 1, 3, // ç¬¬ä¸€ä¸ªä¸‰è§’å½¢
+	1, 2, 3  // ç¬¬äºŒä¸ªä¸‰è§’å½¢
 };
 
 const static float skyboxVertices[] = {
@@ -129,9 +129,9 @@ const static float vertices[] = {
 	  -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
 	  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
-const static unsigned int indices[] = { // ×¢ÒâË÷Òı´Ó0¿ªÊ¼! 
-	0, 1, 3, // µÚÒ»¸öÈı½ÇĞÎ
-	1, 2, 3  // µÚ¶ş¸öÈı½ÇĞÎ
+const static unsigned int indices[] = { // æ³¨æ„ç´¢å¼•ä»0å¼€å§‹! 
+	0, 1, 3, // ç¬¬ä¸€ä¸ªä¸‰è§’å½¢
+	1, 2, 3  // ç¬¬äºŒä¸ªä¸‰è§’å½¢
 };
 
 const static float vertices_learn[] = {
