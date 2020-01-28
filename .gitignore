@@ -1,1 +1,5 @@
 3rd/
+3rdParty
+cmake-build-debug
+.gitignore
+.idea
