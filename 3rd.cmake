@@ -1,0 +1,5 @@
+INCLUDE("${3RD_PATH}/glfw.cmake")
+INCLUDE("${3RD_PATH}/assimp.cmake")
+INCLUDE("${3RD_PATH}/glad.cmake")
+INCLUDE("${3RD_PATH}/glm.cmake")
+INCLUDE("${3RD_PATH}/opencv.cmake")

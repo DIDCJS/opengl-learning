@@ -1,0 +1,10 @@
+
+# include 3rd
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	INCLUDE_DIRECTORIES(${3RD_PATH}/glad/include)
+ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	INCLUDE_DIRECTORIES(${3RD_PATH}/glad/include)
+ELSE()
+	INCLUDE_DIRECTORIES(${3RD_PATH}/glad/include)
+ENDIF()
+

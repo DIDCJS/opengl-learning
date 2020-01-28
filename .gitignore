@@ -1,5 +1,7 @@
 3rd/
-3rdParty
+3rdParty/assimp
+3rdParty/glad
+3rdParty/glfw
+3rdParty/glm
 cmake-build-debug
-.gitignore
 .idea
