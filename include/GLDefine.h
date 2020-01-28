@@ -5,9 +5,11 @@
 #define CHECK_GL {GLenum glError = glGetError(); if(glError != 0){printf("###glError : %d [%d] [%s] \n",glError,__LINE__,__FILE__);}}
 
 #define IMG_PATH R"(img/)"
+#define MAX_LEN 2000
 #define byte unsigned char
 
-static char logInfo[2000];
+static char s_RunPath[MAX_LEN];
+static char logInfo[MAX_LEN];
 
 
 #define LOG(...) \

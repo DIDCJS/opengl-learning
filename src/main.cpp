@@ -4,21 +4,24 @@
 #include <LearnGL.h>
 
 #include <Camera.h>
+#include <GLDefine.h>
 
 #include<iostream>
+
+#include <unistd.h>
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float deltaTime = 0.0f; // µ±Ç°Ö¡ÓëÉÏÒ»Ö¡µÄÊ±¼ä²î
-float lastFrame = 0.0f; // ÉÏÒ»Ö¡µÄÊ±¼ä
+float deltaTime = 0.0f; // ï¿½ï¿½Ç°Ö¡ï¿½ï¿½ï¿½ï¿½Ò»Ö¡ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
+float lastFrame = 0.0f; // ï¿½ï¿½Ò»Ö¡ï¿½ï¿½Ê±ï¿½ï¿½
 
-//mouse ÉÏÏÂ×óÓÒÒÆ¶¯
+//mouse ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½
 bool firstMouse = true;
 float lastX = 400, lastY = 300;
 
 
-//mouse ¹öÂÖ
+//mouse ï¿½ï¿½ï¿½ï¿½
 float fov = 45.0f;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -68,13 +71,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 int main() {
+	 getcwd(s_RunPath, MAX_LEN);
 
 #if 1
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
@@ -96,7 +100,7 @@ int main() {
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
-	//¶ÁÈ¡Í¼Æ¬
+	//ï¿½ï¿½È¡Í¼Æ¬
 	cv::Mat img_1 = cv::imread(IMG_PATH"img1.jpg");
 	cv::Mat img_2 = cv::imread(IMG_PATH"img2.jpg");
 	if (img_1.channels() == 3) {

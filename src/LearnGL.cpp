@@ -1,5 +1,5 @@
 #include <iostream>
-#include <direct.h>
+//#include <direct.h>
 
 #include "LearnGL.h"
 #include "GLShaders.h"
@@ -107,7 +107,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	if (firstDraw == true) {
-		// Î»ÖÃÊôÐÔ
+		// Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
 		nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
 		nowRender.setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
@@ -122,7 +122,7 @@ void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
 	_render[SHADER_LEARN].setFlt3Uniform("dirLight.ambient", 1.0f, 1.0f, 1.0f);
 	_render[SHADER_LEARN].setFlt3Uniform("dirLight.diffuse", 1.0f, 1.0f, 1.0f);
 	_render[SHADER_LEARN].setFlt3Uniform("dirLight.specular", 1.0f, 1.0f, 1.0f);*/
-	//¶¨µÆÔ´
+	//ï¿½ï¿½ï¿½ï¿½Ô´
 	glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.7f,  0.2f,  2.0f),
 	glm::vec3(2.3f, -3.3f, -4.0f),
@@ -213,10 +213,10 @@ void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	if (firstDraw == true) {
-		// Î»ÖÃÊôÐÔ
+		// Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
 		nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
-		//ÎÆÀí×ø±ê
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		//_render[SHADER_LEARN].setVectexAttribute("aTexCoord", 2, 5 * sizeof(float), (const float*)(3 * sizeof(float)));
 		firstDraw = false;
 	}
@@ -258,7 +258,7 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 
 	glBindVertexArray(VAO);
 
-	//¶¨µÆÔ´
+	//ï¿½ï¿½ï¿½ï¿½Ô´
 	glm::vec3 pointLightPositions[] = {
 	glm::vec3(0.7f,  0.2f,  2.0f),
 	//glm::vec3(2.3f, -3.3f, -4.0f),
@@ -281,7 +281,7 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 		nowRender.setFltUniform(IndexPointLight + "quadratic", 0.07f);
 	}
 
-	//viewPos ÓÃÓÚÓë¹âÔ´µãËãÏòÁ¿
+	//viewPos ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
 
 	//LOG("### m_vMesh.size() : %d", m_vMesh.size());
@@ -303,8 +303,8 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 		//LOG("### mesh.textures.size() : %d", mesh.textures.size());
 		for (unsigned int i = 0; i < mesh.textures.size(); i++)
 		{
-			glActiveTexture(GL_TEXTURE0 + i); // ÔÚ°ó¶¨Ö®Ç°¼¤»îÏàÓ¦µÄÎÆÀíµ¥Ôª
-			// »ñÈ¡ÎÆÀíÐòºÅ£¨diffuse_textureN ÖÐµÄ N£©
+			glActiveTexture(GL_TEXTURE0 + i); // ï¿½Ú°ï¿½Ö®Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôª
+			// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½diffuse_textureN ï¿½Ðµï¿½ Nï¿½ï¿½
 			std::string number;
 			std::string name = mesh.textures[i].textureType;
 			if (name == "texture_diffuse") {
@@ -355,7 +355,7 @@ void LearnGL::DrawCute(int nWidth, int nHeight, Camera& camera, float fov) {
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	//if (firstDraw == true) {
-		// Î»ÖÃÊôÐÔ
+		// Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		nowRender.setVectexAttribute("aPos", 3, 3 * sizeof(float), (const float*)(0 * sizeof(float)));
 		/*nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
 		nowRender.setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));*/
@@ -384,13 +384,13 @@ void LearnGL::LoadModel(std::string path) {
 	ProcessNode(m_pScene->mRootNode, m_pScene);
 }
 void LearnGL::ProcessNode(aiNode *node, const aiScene *scene) {
-	// ´¦Àí½ÚµãËùÓÐµÄÍø¸ñ£¨Èç¹ûÓÐµÄ»°£©
+	// ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ»ï¿½ï¿½ï¿½
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
 		m_vMesh.push_back(ProcessMesh(mesh, scene));
 	}
-	// ½ÓÏÂÀ´¶ÔËüµÄ×Ó½ÚµãÖØ¸´ÕâÒ»¹ý³Ì
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½Úµï¿½ï¿½Ø¸ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
 		ProcessNode(node->mChildren[i], scene);
@@ -423,7 +423,7 @@ Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 	{
 		//
 		Vertex vertex;
-		// ´¦Àí¶¥µãÎ»ÖÃ¡¢·¨ÏßºÍÎÆÀí×ø±ê
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½ï¿½ßºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 		vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 		vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
@@ -434,14 +434,14 @@ Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 		//LOG("Position[%d].z : %.3f", i, vertex.Position.z);
 
 	}
-	// ´¦ÀíË÷Òý
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
-		// ´¦Àí²ÄÖÊ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
