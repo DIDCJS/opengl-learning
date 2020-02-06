@@ -5,6 +5,7 @@ varying highp vec2 DestinationTexCoord;
 varying lowp    vec4 v_color;//原图颜色
 varying highp   vec3 v_texCoord;
 
+layout(location = 0) out vec4 outColor;
 void main()
 {
 
@@ -19,6 +20,6 @@ void main()
         texCoords.y = DestinationTexCoord.y;
         texColor = texture2D(Texture, texCoords.xy);
         color *= texColor;
-        gl_FragColor = color;
+        outColor = color;
     
 }

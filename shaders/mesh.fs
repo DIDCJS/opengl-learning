@@ -26,6 +26,8 @@ uniform sampler2D texture_specular1;
 #define NR_POINT_LIGHTS 1
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 
+layout(location = 0) out vec4 outColor;
+
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.position - fragPos);
@@ -50,10 +52,10 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
 
 void main(){
-	// gl_FragColor = texture(texture_specular1, TexCoords);
-	// gl_FragColor = texture(texture_diffuse1, TexCoords);
-	//gl_FragColor = texture(texture_specular1, TexCoords);
-	 //gl_FragColor = vec4(1.0);
+	// outColor = texture(texture_specular1, TexCoords);
+	// outColor = texture(texture_diffuse1, TexCoords);
+	//outColor = texture(texture_specular1, TexCoords);
+	 //outColor = vec4(1.0);
 
 	vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -62,5 +64,5 @@ void main(){
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
 
-    gl_FragColor = vec4(result, 1.0);
+    outColor = vec4(result, 1.0);
 }

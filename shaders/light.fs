@@ -5,16 +5,17 @@ in vec3 Position;
 
 uniform vec3 cameraPos;
 uniform samplerCube skybox;
+layout(location = 0) out vec4 outColor;
 
 void main(){
-	//·´Éä
-	//gl_FragColor = vec4(1.0);
+	//ï¿½ï¿½ï¿½ï¿½
+	//outColor = vec4(1.0);
 	//vec3 I = normalize(Position - cameraPos);
     //vec3 R = reflect(I, normalize(Normal));
-    //gl_FragColor = vec4(texture(skybox, R).rgb, 1.0);
-	//ÕÛÉä
+    //outColor = vec4(texture(skybox, R).rgb, 1.0);
+	//ï¿½ï¿½ï¿½ï¿½
 	 float ratio = 1.00 / 1.52;
     vec3 I = normalize(Position - cameraPos);
     vec3 R = refract(I, normalize(Normal), ratio);
-    gl_FragColor = vec4(texture(skybox, R).rgb, 1.0);
+    outColor = vec4(texture(skybox, R).rgb, 1.0);
 }

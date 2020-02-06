@@ -6,6 +6,8 @@ uniform vec3 lightPos;
 uniform vec3 objectColor;
 uniform vec3 viewPos;
 
+layout(location = 0) out vec4 outColor;
+
 struct DirLight {
     vec3 direction;
 
@@ -137,5 +139,5 @@ void main(){
     // 第三阶段：聚光
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
 
-    gl_FragColor = vec4(result, 1.0);
+    outColor = vec4(result, 1.0);
 }

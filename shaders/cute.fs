@@ -2,6 +2,7 @@
 in vec3 cuteTexCoords;
 
 uniform samplerCube u_skybox;
+layout(location = 0) out vec4 outColor;
 void main(){
-	    gl_FragColor = texture(u_skybox, cuteTexCoords);
+	    outColor = texture(u_skybox, cuteTexCoords);
 }
