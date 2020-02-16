@@ -385,7 +385,7 @@ GLint CreateCuteTexture(TexImage& tex,GLint internalformat, GLenum type, GLenum 
 }
 
 void TextureFromFile(std::string path, TexImage& tex) {
-	std::string prefix = R"(model/nanosuit/)";
+	std::string prefix = MODEL_PREFIX_PATH;
 	cv::Mat img = cv::imread(prefix + path, cv::IMREAD_COLOR);
 	if (img.data == nullptr) {
 		LOGE("### error : can not load texture");

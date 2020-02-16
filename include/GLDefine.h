@@ -5,6 +5,8 @@
 #define CHECK_GL {GLenum glError = glGetError(); if(glError != 0){printf("###glError : %d [%d] [%s] \n",glError,__LINE__,__FILE__);}}
 
 #define IMG_PATH R"(img/)"
+#define MODEL_PATH R"(model/nanosuit/nanosuit.obj)"
+#define MODEL_PREFIX_PATH R"(model/nanosuit/)"
 #define MAX_LEN 2000
 #define byte unsigned char
 

@@ -44,7 +44,7 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	CreateTexture(m_TexImages[TEXTURE2], spercularImg.cols, spercularImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, spercularImg.data);
 	CreateCuteTexture(m_TexImages[TEXTURE3], GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, IMG_PATH  R"(skybox/skybox_0/)");
 
-	LoadModel(R"(model/nanosuit/nanosuit.obj)");
+	LoadModel(MODEL_PATH);
 }
 
 void LearnGL::Release() {
