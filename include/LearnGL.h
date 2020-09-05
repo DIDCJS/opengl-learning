@@ -28,18 +28,19 @@ private:
 	GLRenders* _render;
 	TexImage m_TexImages[NUM_TEXTURES];
 	bool firstDraw = true;
-	//½âÎöÄ£ÐÍ³¡¾°
+	//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½Í³ï¿½ï¿½ï¿½
 	const aiScene *m_pScene = nullptr;
-	//´æ´¢Ã¿¸ö½ÚµãµÄMesh(°üÀ¨Pos,Index,texUV)Êý¾Ý
+	//ï¿½æ´¢Ã¿ï¿½ï¿½ï¿½Úµï¿½ï¿½Mesh(ï¿½ï¿½ï¿½ï¿½Pos,Index,texUV)ï¿½ï¿½ï¿½ï¿½
 	std::vector<Mesh> m_vMesh;
 public:
 	void Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 		unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
 		/*unsigned char* pT2, int nT2W, int nt2H, int nT2C*/) ;
 	void LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov);
-	void Draw3D(int nWidth, int nHeight, Camera& camera, float fov);
+	void Draw3DMesh(int nWidth, int nHeight, Camera& camera, float fov);
+    void Draw3D(int nWidth, int nHeight, Camera& camera, float fov);
 	void DrawCute(int nWidth, int nHeight, Camera& camera, float fov);
-
+    void DrawTest2D(int nWidth, int hHeight);
 	void Release();
 
 protected:
@@ -49,5 +50,6 @@ protected:
 	void ProcessNode(aiNode *node, const aiScene *scene);
 	Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 	std::vector<TexImage> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+    float* GetVerties(int& nSize);
 };
 #endif

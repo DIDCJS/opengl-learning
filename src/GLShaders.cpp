@@ -31,15 +31,17 @@ GLuint GLShaders::LoadShader_Source(GLenum shaderType, const char* pSource)
 	return shader;
 }
 
-GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pFragmentSource)
+GLuint GLShaders::CreateProgram_Source(const char* pVertexSource, const char* pFragmentSource, const std::string sDefine /*= ""*/)
 {
-	GLuint vertexShader = LoadShader_Source(GL_VERTEX_SHADER, pVertexSource);
+    std::string sVs = sDefine + "\n" + pVertexSource;
+    std::string sFs = sDefine + "\n" + pFragmentSource;
+	GLuint vertexShader = LoadShader_Source(GL_VERTEX_SHADER, sVs.c_str());
 	if (!vertexShader)
 	{
 		LOGE("ERROR in load vertex shader!");
 		return 0;
 	}
-	GLuint pixelShader = LoadShader_Source(GL_FRAGMENT_SHADER, pFragmentSource);
+	GLuint pixelShader = LoadShader_Source(GL_FRAGMENT_SHADER, sFs.c_str());
 	if (!pixelShader)
 	{
 		LOGE("ERROR in load pixel shader!");

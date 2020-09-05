@@ -1,5 +1,3 @@
-#include <iostream>
-//#include <direct.h>
 
 #include "LearnGL.h"
 #include "GLShaders.h"
@@ -15,9 +13,16 @@
 
 #include <Mesh.h>
 
+#include <iostream>
+//#include <direct.h>
+
+
 
 const float PI = 3.141592653;
 #define RENDER_FROM_MODEL 1
+#define NEED_POINT_LIGHT
+//#define NEED_SPOT_LIGHT
+//#define NEED_DIR_LIGHT
 
 void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 	unsigned char* pT1, int nT1W, int nT1H, int nT1C/*,
@@ -26,29 +31,32 @@ void LearnGL::Init(unsigned char* pT0, int nT0W, int nT0H, int nT0C,
 
 	glProgram = new GLuint[NUM_SHADERS];
 	_render = new GLRenders[NUM_SHADERS];
+	memset(glProgram, 0, sizeof(GLuint)* NUM_SHADERS);
 	glGenVertexArrays(1, &VAO);
 	glGenVertexArrays(1, &LightVAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 
-	//CreateTexture(m_TexImages[TEXTURE0], nT0W, nT0H, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT0);
+//	CreateTexture(m_TexImages[TEXTURE0], nT0W, nT0H, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT0);
 	//CreateTexture(m_TexImages[TEXTURE1], nT1W, nT1W, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT1);
 	//CreateTexture(m_TexImages[TEXTURE2], nT2W, nT2W, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, pT2);
 
 
 	//diffuses map , spercular map
-	cv::Mat diffuseImg = cv::imread(IMG_PATH"diffuse.png", cv::IMREAD_UNCHANGED);
-	cv::Mat spercularImg = cv::imread(IMG_PATH"specular.png", cv::IMREAD_UNCHANGED);
-	CreateTexture(m_TexImages[TEXTURE1], diffuseImg.cols, diffuseImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, diffuseImg.data);
-	CreateTexture(m_TexImages[TEXTURE2], spercularImg.cols, spercularImg.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, spercularImg.data);
+	cv::Mat img1 = cv::imread(IMG_PATH"brickwall.jpg", cv::IMREAD_COLOR);
+	cv::Mat img2 = cv::imread(IMG_PATH"brickwall_normal.jpg", cv::IMREAD_COLOR);
+    cvtColor(img1, img1, CV_BGR2RGBA);
+    cvtColor(img2, img2, CV_BGR2RGBA);
+	CreateTexture(m_TexImages[TEXTURE1], img1.cols, img1.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, img1.data);
+	CreateTexture(m_TexImages[TEXTURE2], img2.cols, img2.rows, GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, img2.data);
 	CreateCuteTexture(m_TexImages[TEXTURE3], GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA, GL_LINEAR, GL_LINEAR, IMG_PATH  R"(skybox/skybox_0/)");
 
 	LoadModel(MODEL_PATH);
 }
 
 void LearnGL::Release() {
-	delete glProgram;
+	delete[] glProgram;
 	if (VAO != 0) glDeleteVertexArrays(1, &VAO);
 	if (LightVAO != 0) glDeleteVertexArrays(1, &LightVAO);
 	if (VBO != 0) glDeleteBuffers(1, &VBO);
@@ -58,7 +66,7 @@ void LearnGL::Release() {
 	for (int i = 0; i < NUM_SHADERS; i++) {
 		glDeleteProgram(glProgram[i]);
 	}
-	delete glProgram;
+	delete[] glProgram;
 
 	for (int i = 0; i < NUM_TEXTURES; ++i)
 	{
@@ -73,128 +81,13 @@ void LearnGL::Release() {
 }
 
 void LearnGL::LearnGL_Main(int nWidth, int nHeight, Camera& camera, float fov) {
-#if RENDER_FROM_MODEL == 1
-	Draw3D(nWidth, nHeight, camera, fov);
+#if RENDER_FROM_MODEL == 0
+//	Draw3DMesh(nWidth, nHeight, camera, fov);
 #else
-
-	glm::vec3 lightPos = glm::vec3(2.0f, 1.0f, 2.0f);
-	glm::vec3 newLightPos = glm::vec3(2.0f, 1.0f, 2.0f);
-	float precent = glfwGetTime() / 5.0f;
-	precent -= (int)precent;
-	precent *= 2 * PI;
-	float R = sqrt((lightPos.x * lightPos.x) + ((lightPos.y * lightPos.y)));
-	newLightPos.z = sin(precent) * R;
-	newLightPos.x = cos(precent) * R;
-	lightPos = newLightPos;
-	//lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-	//lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
-	//std::cout << precent << std::endl;
-	//COMPLIE SHADER
-
-	glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(
-		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]));
-	auto &nowRender = _render[SHADER_MESH];
-	nowRender.setProgramHandle(glProgram[SHADER_LEARN]);
-	nowRender.Use();
-	//BUFFER
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	if (firstDraw == true) {
-		// λ������
-		nowRender.setVectexAttribute("aPos", 3, 8 * sizeof(float), (const float*)(0 * sizeof(float)));
-		nowRender.setVectexAttribute("aNormal", 3, 8 * sizeof(float), (const float*)(3 * sizeof(float)));
-		nowRender.setVectexAttribute("aTexCoords", 2, 8 * sizeof(float), (const float*)(6 * sizeof(float)));
-	}
-	glEnable(GL_DEPTH_TEST);
-
-	//objectColor viewPos
-	nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
-
-	//DirLight
-	/*_render[SHADER_LEARN].setFlt3Uniform("dirLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
-	_render[SHADER_LEARN].setFlt3Uniform("dirLight.ambient", 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFlt3Uniform("dirLight.diffuse", 1.0f, 1.0f, 1.0f);
-	_render[SHADER_LEARN].setFlt3Uniform("dirLight.specular", 1.0f, 1.0f, 1.0f);*/
-	//����Դ
-	glm::vec3 pointLightPositions[] = {
-	glm::vec3(0.7f,  0.2f,  2.0f),
-	glm::vec3(2.3f, -3.3f, -4.0f),
-	glm::vec3(-4.0f,  2.0f, -12.0f),
-	glm::vec3(0.0f,  0.0f, -3.0f)
-	};
-	int nPointSize = sizeof(pointLightPositions) / sizeof(glm::vec3);
-	for (int i = 0; i < nPointSize; i++) {
-		std::string IndexPointLight = "pointLights[";
-		IndexPointLight += std::to_string(i);
-		IndexPointLight += "].";
-		nowRender.setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
-		nowRender.setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
-		nowRender.setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
-		nowRender.setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
-		nowRender.setFltUniform(IndexPointLight + "constant", 1.0f);
-		nowRender.setFltUniform(IndexPointLight + "linear", 0.09f);
-		nowRender.setFltUniform(IndexPointLight + "quadratic", 0.032f);
-	}
-
-	//spotLight
-	nowRender.setFlt3Uniform("spotLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
-	nowRender.setFlt3Uniform("spotLight.position", camera.Position.x, camera.Position.y, camera.Position.z);
-	nowRender.setFltUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-	nowRender.setFltUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-	nowRender.setFlt3Uniform("spotLight.ambient", 1.0f, 1.0f, 1.0f);
-	nowRender.setFlt3Uniform("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	nowRender.setFlt3Uniform("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	nowRender.setFltUniform("spotLight.constant", 1.0f);
-	nowRender.setFltUniform("spotLight.linear", 0.09f);
-	nowRender.setFltUniform("spotLight.quadratic", 0.032f);
-
-	//material struct
-	nowRender.setFlt3Uniform("material.ambient", 0.329412, 0.223529, 0.027451);
-	nowRender.setFltUniform("material.shininess", 32.0f);
-	nowRender.setTextureID("material.diffuse", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
-	nowRender.setTextureID("material.specular", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
-
-
-	//model view projection
-	glm::mat4 view = glm::mat4(1.0f);
-	view = camera.GetViewMatrix();
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
-	nowRender.setMat4Uniform("view", view);
-	nowRender.setMat4Uniform("projection", projection);
-
-	//define 10 box medels
-	glm::mat4 model;
-	glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-	for (int i = 0; i < 10; i++) {
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, cubePositions[i]);
-		float angle = 20.0f * i;
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		nowRender.setMat4Uniform("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
-	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions);
+	Draw3D(nWidth, nHeight, camera, fov);
+//    DrawTest2D(nWidth, nHeight);
 #endif
-	DrawCute(nWidth, nHeight, camera, fov);
+//	DrawCute(nWidth, nHeight, camera, fov);
 }
 
 void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
@@ -236,7 +129,7 @@ void LearnGL::DrawLight(int nWidth, int nHeight, Camera& camera, float fov,
 	}
 }
 
-void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
+void LearnGL::Draw3DMesh(int nWidth, int nHeight, Camera& camera, float fov) {
 	glProgram[SHADER_MESH] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_MESH]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_MESH]));
 	auto &nowRender = _render[SHADER_MESH];
@@ -326,6 +219,174 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov) {
 	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions, nPointSize);
 }
 
+void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov){
+    glm::vec3 lightPos = glm::vec3(2.0f, 1.0f, 2.0f);
+    glm::vec3 newLightPos = glm::vec3(2.0f, 1.0f, 2.0f);
+    float precent = glfwGetTime() / 5.0f;
+    precent -= (int)precent;
+    precent *= 2 * PI;
+    float R = sqrt((lightPos.x * lightPos.x) + ((lightPos.y * lightPos.y)));
+    newLightPos.z = sin(precent) * R;
+    newLightPos.x = cos(precent) * R;
+    lightPos = newLightPos;
+    //lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+    //lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+    //std::cout << precent << std::endl;
+    //COMPLIE SHADER
+
+    if(glProgram[SHADER_LEARN] <= GL_FALSE) {
+        glProgram[SHADER_LEARN] = GLShaders::CreateProgram_Source(
+                GLShaders::LoadShaderPath(VertexShaderPath[SHADER_LEARN]),
+                GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_LEARN]), "");
+    }
+    auto &nowRender = _render[SHADER_MESH];
+    nowRender.setProgramHandle(glProgram[SHADER_LEARN]);
+    nowRender.Use();
+
+    //BUFFER
+    glBindVertexArray(VAO);
+
+    int nSize = 0;
+    float* pVertices = GetVerties(nSize);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferData(GL_ARRAY_BUFFER, nSize, pVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_matrix), vertices_matrix, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_matrix), indices_matrix, GL_STATIC_DRAW);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    if (firstDraw == true) {
+        // λ������
+        int numPoint = 8;
+        nowRender.setVectexAttribute("aPos", 3, numPoint * sizeof(float), (const float*)(0 * sizeof(float)));
+        nowRender.setVectexAttribute("aNormal", 3, numPoint * sizeof(float), (const float*)(3 * sizeof(float)));
+        nowRender.setVectexAttribute("aTexCoords", 2, numPoint * sizeof(float), (const float*)(6 * sizeof(float)));
+    }
+//    glEnable(GL_DEPTH_TEST);
+
+    //objectColor viewPos
+    nowRender.setFlt3Uniform("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+
+#ifdef NEED_DIR_LIGHT
+    _render[SHADER_LEARN].setFlt3Uniform("dirLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
+    _render[SHADER_LEARN].setFlt3Uniform("dirLight.ambient", 1.0f, 1.0f, 1.0f);
+    _render[SHADER_LEARN].setFlt3Uniform("dirLight.diffuse", 1.0f, 1.0f, 1.0f);
+    _render[SHADER_LEARN].setFlt3Uniform("dirLight.specular", 1.0f, 1.0f, 1.0f);
+#endif
+
+#ifdef NEED_POINT_LIGHT
+    glm::vec3 pointLightPositions[] = {
+            glm::vec3(0.7f,  0.2f,  0.1f),
+    };
+    int nPointSize = sizeof(pointLightPositions) / sizeof(glm::vec3);
+    for (int i = 0; i < nPointSize; i++) {
+        std::string IndexPointLight = "pointLights[";
+        IndexPointLight += std::to_string(i);
+        IndexPointLight += "].";
+        nowRender.setFlt3Uniform(IndexPointLight + "position", pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+        nowRender.setFlt3Uniform(IndexPointLight + "ambient", 1.0f, 1.0f, 1.0f);
+        nowRender.setFlt3Uniform(IndexPointLight + "diffuse", 1.0f, 1.0f, 1.0f);
+        nowRender.setFlt3Uniform(IndexPointLight + "specular", 1.0f, 1.0f, 1.0f);
+        nowRender.setFltUniform(IndexPointLight + "constant", 1.0f);
+        nowRender.setFltUniform(IndexPointLight + "linear", 0.09f);
+        nowRender.setFltUniform(IndexPointLight + "quadratic", 0.032f);
+    }
+#endif
+
+#ifdef NEED_SPOT_LIGHT
+    nowRender.setFlt3Uniform("spotLight.direction", camera.Front.r, camera.Front.g, camera.Front.b);
+    nowRender.setFlt3Uniform("spotLight.position", camera.Position.x, camera.Position.y, camera.Position.z);
+    nowRender.setFltUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    nowRender.setFltUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    nowRender.setFlt3Uniform("spotLight.ambient", 1.0f, 1.0f, 1.0f);
+    nowRender.setFlt3Uniform("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    nowRender.setFlt3Uniform("spotLight.specular", 1.0f, 1.0f, 1.0f);
+    nowRender.setFltUniform("spotLight.constant", 1.0f);
+    nowRender.setFltUniform("spotLight.linear", 0.09f);
+    nowRender.setFltUniform("spotLight.quadratic", 0.032f);
+#endif
+
+    //material struct
+    nowRender.setFlt3Uniform("material.ambient", 0.329412, 0.223529, 0.027451);
+    nowRender.setFltUniform("material.shininess", 32.0f);
+    nowRender.setTextureID("material.diffuse", GL_TEXTURE1, 1, m_TexImages[TEXTURE1].glTexture, 0);
+    nowRender.setTextureID("material.normal", GL_TEXTURE2, 2, m_TexImages[TEXTURE2].glTexture, 0);
+
+
+    //model view projection
+    glm::mat4 view = glm::mat4(1.0f);
+    view = camera.GetViewMatrix();
+    glm::mat4 projection = glm::mat4(1.0f);
+    projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
+    nowRender.setMat4Uniform("view", view);
+    nowRender.setMat4Uniform("projection", projection);
+    glm::mat4 model;
+    model = glm::mat4(1.0f);
+    nowRender.setMat4Uniform("model", model);
+
+//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawElements(GL_TRIANGLES, sizeof(indices_matrix)/sizeof(indices_matrix[0]) , GL_UNSIGNED_INT, 0);
+
+	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions, nPointSize);
+
+
+}
+
+void LearnGL::DrawTest2D(int nWidth, int hHeight){
+    if(glProgram[SHADER_BASE] <= GL_FALSE) {
+        glProgram[SHADER_BASE] = GLShaders::CreateProgram_Source(
+                GLShaders::LoadShaderPath(VertexShaderPath[SHADER_BASE]),
+                GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_BASE]), "");
+    }
+    auto &nowRender = _render[SHADER_BASE];
+    nowRender.setProgramHandle(glProgram[SHADER_BASE]);
+    nowRender.Use();
+
+    //fbo
+//    unsigned int framebuffer;
+//    glGenFramebuffers(1, &framebuffer);
+//    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+//    // 生成纹理
+//    unsigned int texColorBuffer;
+//    glGenTextures(1, &texColorBuffer);
+//    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//
+//// 将它附加到当前绑定的帧缓冲对象
+//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+    //BUFFER
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_matrix), vertices_matrix, GL_STATIC_DRAW);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    if (firstDraw == true) {
+        // λ������
+        nowRender.setVectexAttribute("aPos", 3, 5 * sizeof(float), (const float*)(0 * sizeof(float)));
+    }
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+
+//    byte* pTmp = new byte[800 * 600 * 4];
+//    glReadPixels(0, 0, 800, 600, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pTmp);
+//
+//    cv::Mat outputImage(hHeight, nWidth, CV_8UC4, pTmp);
+//    cv::imshow("test", outputImage);
+//    delete[] pTmp;
+
+}
+
 void LearnGL::DrawCute(int nWidth, int nHeight, Camera& camera, float fov) {
 	glProgram[SHADER_CUTE] = GLShaders::CreateProgram_Source(
 		GLShaders::LoadShaderPath(VertexShaderPath[SHADER_CUTE]), GLShaders::LoadShaderPath(FragmentShaderPath[SHADER_CUTE]));
@@ -368,6 +429,7 @@ void LearnGL::DrawCute(int nWidth, int nHeight, Camera& camera, float fov) {
 	glDepthFunc(GL_LEQUAL);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
 }
 
@@ -454,5 +516,72 @@ Mesh LearnGL::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 	}
 
 	return Mesh(vertices, indices, textures);
+
+}
+
+float* LearnGL::GetVerties(int &nSize){
+    glm::vec3 pos1(-1.0f,  1.0f, 0.0f);
+    glm::vec3 pos2(-1.0f, -1.0f, 0.0f);
+    glm::vec3 pos3( 1.0f, -1.0f, 0.0f);
+    glm::vec3 pos4( 1.0f,  1.0f, 0.0f);
+    // texture coordinates
+    glm::vec2 uv1(0.0f, 1.0f);
+    glm::vec2 uv2(0.0f, 0.0f);
+    glm::vec2 uv3(1.0f, 0.0f);
+    glm::vec2 uv4(1.0f, 1.0f);
+    // normal vector
+    glm::vec3 nm(0.0f, 0.0f, 1.0f);
+
+    // calculate tangent/bitangent vectors of both triangles
+    glm::vec3 tangent1, bitangent1;
+    glm::vec3 tangent2, bitangent2;
+    // triangle 1
+    // ----------
+    glm::vec3 edge1 = pos2 - pos1;
+    glm::vec3 edge2 = pos3 - pos1;
+    glm::vec2 deltaUV1 = uv2 - uv1;
+    glm::vec2 deltaUV2 = uv3 - uv1;
+
+    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+    // triangle 2
+    // ----------
+    edge1 = pos3 - pos1;
+    edge2 = pos4 - pos1;
+    deltaUV1 = uv3 - uv1;
+    deltaUV2 = uv4 - uv1;
+
+    f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+
+    bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+
+    float quadVertices[] = {
+            // positions            // normal         // texcoords  // tangent                          // bitangent
+            pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+            pos2.x, pos2.y, pos2.z, nm.x, nm.y, nm.z, uv2.x, uv2.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+            pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+
+            pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+            pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+            pos4.x, pos4.y, pos4.z, nm.x, nm.y, nm.z, uv4.x, uv4.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z
+    };
+    nSize = sizeof(quadVertices);
+    return quadVertices;
 
 }
