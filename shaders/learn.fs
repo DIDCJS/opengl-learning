@@ -3,6 +3,7 @@
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoords;
+in mat3 TBN;
 uniform vec3 lightPos;
 uniform vec3 objectColor;
 uniform vec3 viewPos;
@@ -144,6 +145,7 @@ void main(){
 	 // 属性
     vec3 normTex = texture(material.normal, TexCoords).rgb;
     vec3 norm = normalize(normTex * 2.0 - 1.0);
+    norm = normalize(TBN * norm); 
     // vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 result = vec3(0.0);

@@ -246,25 +246,96 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov){
     //BUFFER
     glBindVertexArray(VAO);
 
-    int nSize = 0;
-    float* pVertices = GetVerties(nSize);
+//    int nSize = 0;
+//    float* pVertices = GetVerties(nSize);
+//
+//    for(int i = 0 ; i< nSize ;i++){
+//        printf("%.3f, ",pVertices[i]);
+//    }
+//    printf("\n");
+
+
+    glm::vec3 pos1(-1.0f,  1.0f, 0.0f);
+    glm::vec3 pos2(-1.0f, -1.0f, 0.0f);
+    glm::vec3 pos3( 1.0f, -1.0f, 0.0f);
+    glm::vec3 pos4( 1.0f,  1.0f, 0.0f);
+    // texture coordinates
+    glm::vec2 uv1(0.0f, 1.0f);
+    glm::vec2 uv2(0.0f, 0.0f);
+    glm::vec2 uv3(1.0f, 0.0f);
+    glm::vec2 uv4(1.0f, 1.0f);
+    // normal vector
+    glm::vec3 nm(0.0f, 0.0f, 1.0f);
+
+    // calculate tangent/bitangent vectors of both triangles
+    glm::vec3 tangent1, bitangent1;
+    glm::vec3 tangent2, bitangent2;
+    // triangle 1
+    // ----------
+    glm::vec3 edge1 = pos2 - pos1;
+    glm::vec3 edge2 = pos3 - pos1;
+    glm::vec2 deltaUV1 = uv2 - uv1;
+    glm::vec2 deltaUV2 = uv3 - uv1;
+
+    float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+    // triangle 2
+    // ----------
+    edge1 = pos3 - pos1;
+    edge2 = pos4 - pos1;
+    deltaUV1 = uv3 - uv1;
+    deltaUV2 = uv4 - uv1;
+
+    f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+
+    bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+
+    float quadVertices[] = {
+            // positions            // normal         // texcoords  // tangent                          // bitangent
+            pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+            pos2.x, pos2.y, pos2.z, nm.x, nm.y, nm.z, uv2.x, uv2.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+            pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+
+            pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+            pos3.x, pos3.y, pos3.z, nm.x, nm.y, nm.z, uv3.x, uv3.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+            pos4.x, pos4.y, pos4.z, nm.x, nm.y, nm.z, uv4.x, uv4.y, tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z
+    };
+
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 //    glBufferData(GL_ARRAY_BUFFER, nSize, pVertices, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_matrix), vertices_matrix, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_matrix), indices_matrix, GL_STATIC_DRAW);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_matrix), indices_matrix, GL_STATIC_DRAW);
 
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     if (firstDraw == true) {
         // λ������
-        int numPoint = 8;
+        int numPoint = 14;
         nowRender.setVectexAttribute("aPos", 3, numPoint * sizeof(float), (const float*)(0 * sizeof(float)));
         nowRender.setVectexAttribute("aNormal", 3, numPoint * sizeof(float), (const float*)(3 * sizeof(float)));
         nowRender.setVectexAttribute("aTexCoords", 2, numPoint * sizeof(float), (const float*)(6 * sizeof(float)));
+        nowRender.setVectexAttribute("aTangent", 3, numPoint * sizeof(float), (const float*)(8 * sizeof(float)));
+        nowRender.setVectexAttribute("aBitangent", 3, numPoint * sizeof(float), (const float*)(11 * sizeof(float)));
     }
 //    glEnable(GL_DEPTH_TEST);
 
@@ -324,12 +395,15 @@ void LearnGL::Draw3D(int nWidth, int nHeight, Camera& camera, float fov){
     projection = glm::perspective(glm::radians(fov), (float)nWidth / nHeight, 0.1f, 100.0f);
     nowRender.setMat4Uniform("view", view);
     nowRender.setMat4Uniform("projection", projection);
-    glm::mat4 model;
-    model = glm::mat4(1.0f);
+//    glm::mat4 model;
+//    model = glm::mat4(1.0f);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model,  -10.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
     nowRender.setMat4Uniform("model", model);
 
-//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDrawElements(GL_TRIANGLES, sizeof(indices_matrix)/sizeof(indices_matrix[0]) , GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+//    glDrawElements(GL_TRIANGLES, sizeof(indices_matrix)/sizeof(indices_matrix[0]) , GL_UNSIGNED_INT, 0);
 
 	DrawLight(nWidth, nHeight, camera, fov, view, projection, pointLightPositions, nPointSize);
 
